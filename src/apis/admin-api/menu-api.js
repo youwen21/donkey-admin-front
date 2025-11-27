@@ -7,8 +7,8 @@ export const menuAPI = {
    * 获取树形菜单列表
    * @returns {Promise} 返回菜单树数据的 Promise
    */
-  getTreeMenu: () => {
-    return adminAPIClient.get(`/admin-api/v1/treeMenu`)
+  getTree: () => {
+    return adminAPIClient.get(`/admin-api/v1/menu/tree`)
   },
 
   /**

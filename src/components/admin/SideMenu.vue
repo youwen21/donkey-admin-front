@@ -1,6 +1,6 @@
 <template>
   <div class="side-menu">
-    <div class="menu-list">
+    <div class="menu-listx">
       <template v-for="item in menuList" :key="item.id">
         <!-- 一级菜单 -->
         <MenuItem
@@ -32,7 +32,9 @@
 import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import MenuItem from './MenuItem.vue'
-import sideMenuStore from '@/store/sideMenu.js'
+
+const activeItemPath = ref("")
+let  activeItemNodePath = ""
 
 const props = defineProps({
   menuData: {
@@ -48,6 +50,10 @@ const expandedItems = ref(new Set())
 
 // 过滤并排序一级菜单数据
 const menuList = computed(() => {
+  // 确保 menuData 是数组
+  if (!Array.isArray(props.menuData)) {
+    return []
+  }
   return props.menuData
     .filter(item => item.status === 1) // 只显示启用状态的菜单
     .sort((a, b) => (a.order_no || 0) - (b.order_no || 0))
@@ -63,9 +69,22 @@ const getFilteredChildren = (item) => {
     .sort((a, b) => (a.order_no || 0) - (b.order_no || 0))
 }
 
-// 获取菜单路径
+// 获取菜单路径, item.url格式 是 /xxx/xxx 或者  /xxx/xxx?param=value, 返回 /xxx/xxx
 const getMenuPath = (item) => {
-  return item.url || ''
+  if (!item.url) return ''
+
+  // 如果 url 包含 ?，则返回 url 的 path
+  if (item.url.includes('?')) {
+    return  item.url.split('?')[0]
+  }
+
+  // 否则返回 url
+  return item.url
+}
+
+// 获取菜单节点路径, 返回 /1/2/3/
+const getMenuNodePath = (item) => {
+  return item.node_path + item.id + '/'
 }
 
 // 判断菜单项是否激活
@@ -76,42 +95,37 @@ const isItemActive = (item) => {
   if (item.url == '/') {
     return false
   }
-  
-  // 如果 store 中有激活路径，使用 store 的值
-  if (sideMenuStore.activeItemPath) {
+  // 场景1: 正常步骤点击进入
+  // 如果 activeItemPath 中有激活路径，使用 activeItemPath 的值
+  if (activeItemPath.value) {
     // 精确匹配
-    if (sideMenuStore.activeItemPath === menuPath) {
+    if (activeItemPath.value === menuPath) {
       return true
     }
-    // 路径前缀匹配（但排除父路径）
-    if (sideMenuStore.activeItemPath.startsWith(menuPath + '/')) {
-      // 检查是否有子菜单，如果有子菜单，需要检查是否有激活的子菜单
-      if (item.children && item.children.length > 0) {
-        const hasActive = hasItemActiveChild(item)
-        return !hasActive
-      }
-      return true
-    }
-    return false
   }
   
-  // 如果 store 中没有值，使用路由路径判断
-  const currentPath = route.path
+  // 场景2: 非点击进入，直接打开url 
+  const currentRoutePath = route.path
   
   // 精确匹配
-  if (currentPath === menuPath) {
+  if (currentRoutePath === menuPath) {
+    return true
+  }
+
+  // route.meta.activeNodePath 是当前菜单的节点路径
+  if (route.meta.activeNodePath && route.meta.activeNodePath === item.node_path) {
     return true
   }
   
-  // 路径前缀匹配（但排除父路径）
-  if (currentPath.startsWith(menuPath + '/')) {
-    // 检查是否有子菜单
-    if (item.children && item.children.length > 0) {
-      const hasActive = hasItemActiveChild(item)
-      return !hasActive
-    }
-    return true
-  }
+  // 路径前缀匹配（但排除父路径）, 暂不使用，路由规划后使用
+  // if (currentRoutePath.startsWith(menuPath + '/')) {
+  //   // 检查是否有子菜单
+  //   if (item.children && item.children.length > 0) {
+  //     const hasActive = hasItemActiveChild(item)
+  //     return !hasActive
+  //   }
+  //   return true
+  // }
   
   return false
 }
@@ -120,7 +134,7 @@ const isItemActive = (item) => {
 const hasItemActiveChild = (item) => {
   if (!item.children || item.children.length === 0) return false
   
-  const activePath = sideMenuStore.activeItemPath || route.path
+  const activePath = activeItemPath.value || route.path
   
   return item.children.some(child => {
     if (child.status !== 1) return false
@@ -141,7 +155,8 @@ const hasItemActiveChild = (item) => {
 const handleItemClick = (item) => {
   const itemPath = getMenuPath(item)
   if (itemPath && itemPath != '/') {
-    sideMenuStore.setActiveItemPath(itemPath)
+    activeItemPath.value = itemPath
+    activeItemNodePath = item.node_path
   }
   
   // 如果有子菜单，切换展开/折叠状态
@@ -214,44 +229,25 @@ const expandParentMenus = (items, targetPath, parentIds = []) => {
 // 根据路由路径初始化激活项
 const initActiveItemByRoute = () => {
   // 如果 store 中已有激活路径，不覆盖
-  if (sideMenuStore.activeItemPath) {
+  if (activeItemPath.value) {
     // 展开包含激活项的父菜单
-    expandParentMenus(menuList.value, sideMenuStore.activeItemPath)
+    expandParentMenus(menuList.value, activeItemPath.value)
     return
   }
   
-  const currentPath = route.path
-  const matchedItem = findMenuItemByPath(menuList.value, currentPath)
-  if (matchedItem) {
-    const matchedPath = getMenuPath(matchedItem)
-    if (matchedPath) {
-      sideMenuStore.setActiveItemPath(matchedPath)
-      // 展开包含激活项的父菜单
-      expandParentMenus(menuList.value, matchedPath)
-    }
-  }
 }
 
-// 监听路由变化，当 store 为空时根据路由设置激活项
-watch(
-  () => route.path,
-  () => {
-    // 只有当 store 中没有激活路径时，才根据路由设置
-    if (!sideMenuStore.activeItemPath) {
-      initActiveItemByRoute()
-    } else {
-      // 如果 store 中有值，也要展开父菜单
-      expandParentMenus(menuList.value, sideMenuStore.activeItemPath)
-    }
-  },
-  { immediate: true }
-)
-
-// 监听菜单数据变化，初始化激活项
+// 监听菜单数据变化，初始化激活项并默认展开所有菜单
 watch(
   () => props.menuData,
   () => {
-    if (props.menuData && props.menuData.length > 0) {
+    if (Array.isArray(props.menuData) && props.menuData.length > 0) {
+      // 默认展开所有有子菜单的一级菜单
+      menuList.value.forEach(item => {
+        if (item.children && item.children.length > 0) {
+          expandedItems.value.add(item.id)
+        }
+      })
       initActiveItemByRoute()
     }
   },
@@ -262,13 +258,13 @@ watch(
 <style scoped>
 .side-menu {
   width: 240px;
-  height: 100vh;
+  height: 100%;
   background-color: #001529;
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-.menu-list {
+.menu-listx {
   padding: 16px 0;
 }
 

@@ -67,7 +67,11 @@
             v-else
             v-for="item in displayList"
             :key="item.id"
-            :class="{ 'disabled-row': item.status !== 1 }"
+            :class="{ 
+              'disabled-row': item.status !== 1,
+              'selected-row': selectedId === item.id
+            }"
+            @click="handleRowClick(item)"
           >
             <td>{{ item.id }}</td>
             <td>
@@ -89,7 +93,7 @@
             <td>{{ item.order_no || 0 }}</td>
             <td>{{ formatDateTime(item.create_time) }}</td>
             <td>{{ formatDateTime(item.update_time) }}</td>
-            <td class="action-cell">
+            <td class="action-cell" @click.stop>
               <button class="btn-action btn-edit" @click="handleEdit(item)">编辑</button>
               <button
                 v-if="item.status !== 0"
@@ -145,6 +149,7 @@ const systemFilter = ref('')
 const currentPage = ref(1)
 const pageSize = ref(200)
 const total = ref(0)
+const selectedId = ref(null)
 
 // 计算属性
 const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
@@ -247,11 +252,26 @@ const handleDeleteItem = async (item) => {
         return
       }
   
+      // 如果删除的是选中的项，清空选中状态
+      if (selectedId.value === item.id) {
+        selectedId.value = null
+      }
+      
       await fetchMenuList()
       toastSuccess('删除成功')
     } catch (error) {
       toastException(error, '删除失败')
     }
+  }
+}
+
+// 处理行点击选中
+const handleRowClick = (item) => {
+  // 如果点击的是已选中的行，则取消选中；否则选中该行
+  if (selectedId.value === item.id) {
+    selectedId.value = null
+  } else {
+    selectedId.value = item.id
   }
 }
 
@@ -430,12 +450,30 @@ onMounted(async () => {
   white-space: nowrap;
 }
 
+.data-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
 .data-table tbody tr:hover {
   background: #f5f5f5;
 }
 
+.data-table tbody tr.selected-row {
+  background: #e6f7ff;
+  border-left: 3px solid #1890ff;
+}
+
+.data-table tbody tr.selected-row:hover {
+  background: #bae7ff;
+}
+
 .disabled-row {
   opacity: 0.6;
+}
+
+.disabled-row.selected-row {
+  opacity: 0.8;
 }
 
 .loading-row,
@@ -483,45 +521,7 @@ onMounted(async () => {
   border: 1px solid #ffd591;
 }
 
-.action-cell {
-  display: flex;
-  gap: 8px;
-}
 
-.btn-action {
-  padding: 4px 12px;
-  border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.btn-edit {
-  background: #e6f7ff;
-  color: #1890ff;
-}
-
-.btn-edit:hover {
-  background: #bae7ff;
-}
-
-.btn-delete {
-  background: #fff7e6;
-  color: #fa8c16;
-}
-
-.btn-delete:hover {
-  background: #ffe7ba;
-}
-
-.btn-remove {
-  background: #fff1f0;
-  color: #ff4d4f;
-}
-
-.btn-remove:hover {
-  background: #ffccc7;
-}
+/* 按钮样式已提取到 assets/admin-ui.css */
 </style>
 

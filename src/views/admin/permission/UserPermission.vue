@@ -3,10 +3,34 @@
     <!-- 顶部工具栏 -->
     <div class="toolbar">
       <div class="toolbar-left">
-        <div class="user-info" v-if="userInfo">
-          <span class="user-label">用户：</span>
-          <span class="user-name">{{ userInfo.name }}</span>
-          <span class="user-real-name" v-if="userInfo.real_name">({{ userInfo.real_name }})</span>
+        <div class="user-info-card" v-if="userInfo">
+          <div class="user-info-header">
+            <span class="user-label">用户信息：</span>
+            <span class="user-name">{{ userInfo.name }}</span>
+            <span class="user-real-name" v-if="userInfo.real_name">({{ userInfo.real_name }})</span>
+            <span :class="['user-status-badge', userInfo.status === 1 ? 'status-active' : 'status-inactive']">
+              {{ userInfo.status === 1 ? '在职' : '离职' }}
+            </span>
+            <span v-if="userInfo.is_root === 1" class="user-root-badge">Root</span>
+          </div>
+          <div class="user-info-details">
+            <span v-if="userInfo.staff_no" class="info-item">
+              <span class="info-label">员工号：</span>
+              <span class="info-value">{{ userInfo.staff_no }}</span>
+            </span>
+            <span v-if="userInfo.email" class="info-item">
+              <span class="info-label">邮箱：</span>
+              <span class="info-value">{{ userInfo.email }}</span>
+            </span>
+            <span v-if="userInfo.phone" class="info-item">
+              <span class="info-label">手机：</span>
+              <span class="info-value">{{ userInfo.phone }}</span>
+            </span>
+            <span v-if="userInfo.is_staff === 1" class="info-item">
+              <span class="info-label">类型：</span>
+              <span class="info-value">内部员工</span>
+            </span>
+          </div>
         </div>
         <div class="form-group-inline">
           <label class="form-label">子系统：</label>
@@ -30,7 +54,7 @@
 
     <div v-else-if="permissionData" class="permission-content">
       <!-- 管理员标识 -->
-      <div class="admin-badge" v-if="permissionData.is_admin">
+      <div class="admin-badge" v-if="permissionData.is_root">
         <span class="badge-icon">👑</span>
         <span class="badge-text">（Root）管理员权限</span>
       </div>
@@ -75,7 +99,7 @@
                     :checked="isMenuPermitted(menu.id)"
                     @change="handleMenuPermissionChange(menu.id, $event)"
                     class="menu-checkbox"
-                    :disabled="permissionData.is_admin"
+                    :disabled="permissionData.is_root"
                   />
                   <span class="checkbox-text">{{ isMenuPermitted(menu.id) ? '已授权' : '未授权' }}</span>
                 </label>
@@ -88,7 +112,7 @@
                 <input 
                   :data-operation-id="operation.id" 
                   type="checkbox" 
-                  :disabled="permissionData.is_admin" 
+                  :disabled="permissionData.is_root" 
                   :checked="isOperationPermitted(operation.id)" 
                   class="operation-checkbox" 
                   @change="handleOperationPermissionChange(operation.id, $event)"
@@ -120,7 +144,7 @@ import { ref, computed, onMounted, watch, toRaw } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { subsystemFetchList } from '@/apis/admin-api/subsystem-api.js'
 import { userAPI, userGet } from '@/apis/admin-api/user-api.js'
-import { menuPermissionAPI, menuPermissionDetail } from '@/apis/admin-api/menu-permission-api.js'
+import { userPermissionAPI, userPermissionConfig } from '@/apis/admin-api/user-permission-api.js'
 import { confirm, toastSuccess, toastException, toastError } from '@/utils/toast.js'
 
 const route = useRoute()
@@ -189,7 +213,7 @@ const handleLoadPermission = async () => {
 
   loading.value = true
   try {
-    const data = await menuPermissionDetail({
+    const data = await userPermissionConfig({
       system_id: selectedSystemId.value,
       user_id: selectedUserId.value
     })
@@ -227,7 +251,7 @@ const isOperationPermitted = (operationId) => {
 
 // 处理菜单权限变更
 const handleMenuPermissionChange = async (menuId, event) => {
-  if (permissionData.value.is_admin) {
+  if (permissionData.value.is_root) {
     // event.target.checked = true
     toastError('管理员拥有所有权限，无法修改', '权限提示')
     return
@@ -242,27 +266,8 @@ const handleMenuPermissionChange = async (menuId, event) => {
   }
 
   const isChecked = event.target.checked
-  // event.target.checked = !isChecked
-
-  // const action = isChecked ? '授权' : '取消授权'
-  // const menuName = menu ? menu.name : '菜单'
-
-  // const confirmed = await confirm(
-  //   `确定要${action}菜单"${menuName}"的权限吗？`,
-  //   isChecked 
-  //     ? `授权后用户将可以访问该菜单` 
-  //     : `取消授权后用户将无法访问该菜单`
-  // )
-
-  // if (!confirmed) {
-  //   // 取消操作，恢复checkbox状态
-  //   event.target.checked = !isChecked
-  //   return
-  // }
 
   try {
-
-
     // 更新菜单权限列表
     const menuIdList = [...(permData.user_permissions.menu_id_list || [])]
     if (isChecked) {
@@ -289,19 +294,6 @@ const handleMenuPermissionChange = async (menuId, event) => {
 
     permData.user_permissions.menu_id_list = menuIdList
     
-    // 更新操作权限列表（如果取消菜单权限，需要同步取消该菜单下的所有操作权限）
-    // if (!isChecked && menu && menu.operations && menu.operations.length > 0) {
-    //   const operationIdList = permissionData.value.user_permissions.operation_id_list || []
-    //   menu.operations.forEach(op => {
-    //     const opIndex = operationIdList.indexOf(op.id)
-    //     if (opIndex > -1) {
-    //       operationIdList.splice(opIndex, 1)
-    //     }
-    //   })
-    //   // 确保响应式更新
-    //   permissionData.value.user_permissions.operation_id_list = [...operationIdList]
-    // }
-    
     // 强制触发 Vue 响应式更新，确保 checkbox 状态同步
     permissionData.value = {...permData}
 
@@ -313,7 +305,7 @@ const handleMenuPermissionChange = async (menuId, event) => {
 }
 
 const handleOperationPermissionChange = async (operationId, event) => {
-  if (permissionData.value.is_admin) {
+  if (permissionData.value.is_root) {
     toastError('管理员拥有所有权限，无法修改', '权限提示')
     return
   }
@@ -338,7 +330,7 @@ const savePermission = async () => {
 
   try {
     // 调用API更新权限
-    await menuPermissionAPI.setPermission({
+    await userPermissionAPI.save({
       system_id: selectedSystemId.value,
       user_id: selectedUserId.value,
       menu_id_list: permissionData.value.user_permissions.menu_id_list || [],
@@ -405,14 +397,22 @@ onMounted(async () => {
   gap: 16px;
 }
 
-.user-info {
+.user-info-card {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
-  padding: 8px 16px;
+  padding: 12px 16px;
   background: #f0f5ff;
   border-radius: 4px;
   border: 1px solid #adc6ff;
+  min-width: 300px;
+}
+
+.user-info-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .user-label {
@@ -430,6 +430,62 @@ onMounted(async () => {
 .user-real-name {
   font-size: 14px;
   color: #999;
+}
+
+.user-status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.user-status-badge.status-active {
+  background: #f6ffed;
+  color: #52c41a;
+  border: 1px solid #b7eb8f;
+}
+
+.user-status-badge.status-inactive {
+  background: #fff2e8;
+  color: #fa8c16;
+  border: 1px solid #ffd591;
+}
+
+.user-root-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #fff7e6;
+  color: #fa8c16;
+  border: 1px solid #ffd591;
+}
+
+.user-info-details {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+  border-top: 1px solid #d6e4ff;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.info-label {
+  color: #666;
+  font-weight: 500;
+}
+
+.info-value {
+  color: #333;
 }
 
 .form-group-inline {

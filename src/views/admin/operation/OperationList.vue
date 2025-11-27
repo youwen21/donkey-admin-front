@@ -224,8 +224,16 @@ const getMenuName = (menuId) => {
 
 // 获取菜单显示名称（带层级缩进）
 const getMenuDisplayName = (menu) => {
-  const indent = '  '.repeat(menu.level || 0)
-  const prefix = menu.level > 0 ? '└─ ' : ''
+  // const indent = '  '.repeat(menu.level || 0)
+  // const prefix = menu.level > 0 ? '└─ ' : ''
+  // return `${indent}${prefix}${menu.name}`
+
+  if (menu.level === 0) {
+    return menu.name
+  }
+  // 使用非断行空格（\u00A0）实现缩进，每级缩进 4 个非断行空格
+  const indent = '\u00A0\u00A0\u00A0\u00A0'.repeat(menu.level)
+  const prefix = '└─ '
   return `${indent}${prefix}${menu.name}`
 }
 
@@ -498,45 +506,7 @@ onMounted(async () => {
   border: 1px solid #ffd591;
 }
 
-.action-cell {
-  display: flex;
-  gap: 8px;
-}
 
-.btn-action {
-  padding: 4px 12px;
-  border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.btn-edit {
-  background: #e6f7ff;
-  color: #1890ff;
-}
-
-.btn-edit:hover {
-  background: #bae7ff;
-}
-
-.btn-delete {
-  background: #fff7e6;
-  color: #fa8c16;
-}
-
-.btn-delete:hover {
-  background: #ffe7ba;
-}
-
-.btn-remove {
-  background: #fff1f0;
-  color: #ff4d4f;
-}
-
-.btn-remove:hover {
-  background: #ffccc7;
-}
+/* 按钮样式已提取到 assets/admin-ui.css */
 </style>
 

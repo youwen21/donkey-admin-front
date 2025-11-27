@@ -3,7 +3,7 @@
     <!-- 搜索和操作栏 -->
     <div class="toolbar">
       <div class="toolbar-left">
-        <input
+        <!-- <input
           v-model="searchKeyword"
           type="text"
           class="search-input"
@@ -17,7 +17,7 @@
         </select>
         <button class="btn btn-search" @click="handleSearch">
           查询
-        </button>
+        </button> -->
       </div>
       <div class="toolbar-right">
         <button class="btn btn-primary" @click="handleAdd">
@@ -119,7 +119,7 @@ const loading = ref(false)
 const searchKeyword = ref('')
 const statusFilter = ref('')
 const currentPage = ref(1)
-const pageSize = ref(20)
+const pageSize = ref(200)
 const total = ref(0)
 
 // 计算属性
@@ -381,45 +381,6 @@ onMounted(() => {
   border: 1px solid #ffd591;
 }
 
-.action-cell {
-  display: flex;
-  gap: 8px;
-}
-
-.btn-action {
-  padding: 4px 12px;
-  border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.btn-edit {
-  background: #e6f7ff;
-  color: #1890ff;
-}
-
-.btn-edit:hover {
-  background: #bae7ff;
-}
-
-.btn-delete {
-  background: #fff7e6;
-  color: #fa8c16;
-}
-
-.btn-delete:hover {
-  background: #ffe7ba;
-}
-
-.btn-remove {
-  background: #fff1f0;
-  color: #ff4d4f;
-}
-
-.btn-remove:hover {
-  background: #ffccc7;
-}
+/* 按钮样式已提取到 assets/admin-ui.css */
 </style>
 

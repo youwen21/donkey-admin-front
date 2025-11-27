@@ -4,15 +4,16 @@
 const requestConfig = {
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000',
   timeout: 10000,
+  withCredentials: true, // 请求携带cookie
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
 }
 
 // 响应状态码配置
 const responseCodes = {
-  SUCCESS: 200,
-  UNAUTHORIZED: 401,
+  SUCCESS: 0,
+  UNAUTHORIZED: 1,
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   SERVER_ERROR: 500,
@@ -77,7 +78,7 @@ class AdminAPIClient {
 
     // 响应拦截器
     this.responseInterceptor = (response) => {
-      const { data, status } = response
+      const { data, status, headers } = response
       
       // 处理业务状态码
       if (data && typeof data.code !== 'undefined') {
@@ -203,12 +204,19 @@ class AdminAPIClient {
       const interceptedConfig = this.requestInterceptor(config)
       
       // 发送请求
-      const response = await fetch(interceptedConfig.url, {
+      const fetchOptions = {
         method: interceptedConfig.method || 'GET',
         headers: interceptedConfig.headers,
         body: interceptedConfig.method !== 'GET' ? JSON.stringify(interceptedConfig.data) : undefined,
         signal: AbortSignal.timeout(interceptedConfig.timeout || this.config.timeout)
-      })
+      }
+      
+      // 如果配置了 withCredentials，则携带 cookie
+      if (this.config.withCredentials || interceptedConfig.withCredentials) {
+        fetchOptions.credentials = 'include'
+      }
+      
+      const response = await fetch(interceptedConfig.url, fetchOptions)
       
       // 检查响应状态
       if (!response.ok) {
@@ -218,8 +226,24 @@ class AdminAPIClient {
       // 解析响应数据
       const data = await response.json()
       
-      // 应用响应拦截器
-      return this.responseInterceptor({ data, status: response.status })
+      // 获取暴露的自定义响应头（需要后端设置 Access-Control-Expose-Headers）
+      // 例如：X-Total-Count, X-Auth-Token, X-Request-Id 等
+      const exposedHeaders = {}
+      const headerNames = ['X-Total-Count', 'X-Auth-Token', 'X-Request-Id', 'X-Page-Size', 'X-Page-Number']
+      headerNames.forEach(headerName => {
+        const value = response.headers.get(headerName)
+        if (value !== null) {
+          exposedHeaders[headerName] = value
+        }
+      })
+      
+      // 应用响应拦截器，传递响应头和状态码
+      return this.responseInterceptor({ 
+        data, 
+        status: response.status,
+        headers: exposedHeaders,
+        fullResponse: response // 保留完整响应对象，以便需要时访问其他信息
+      })
       
     } catch (error) {
       // 应用错误拦截器

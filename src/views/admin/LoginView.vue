@@ -37,6 +37,19 @@
             </button>
           </div>
         </div>
+
+        <!-- 7天免登录 -->
+        <div class="form-group remember-group">
+          <label for="remember" class="remember-label">
+            <input
+              id="remember"
+              v-model="form.remember"
+              type="checkbox"
+              class="remember-checkbox"
+            />
+            <span class="remember-text">7天免登录</span>
+          </label>
+        </div>
         
         <button
           type="submit"
@@ -56,14 +69,16 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { authAPI } from '@/apis/admin-api/auth-api.js'
 
 const router = useRouter()
+const route = useRoute()
 
 const form = ref({
   username: '',
-  password: ''
+  password: '',
+  remember: false // 7天免登录选项
 })
 
 const showPassword = ref(false)
@@ -83,12 +98,20 @@ const handleLogin = async () => {
   try {
     const response = await authAPI.login({
       username: form.value.username,
-      password: form.value.password
+      password: form.value.password,
+      remember: form.value.remember // 传递7天免登录选项
     })
     
-    if (response && response.data) {
-      // 登录成功，跳转到管理后台
-      router.push({ name: 'admin.dashboard' })
+    if (response && response.code === 0) {
+      // 登录成功，检查是否有redirect参数
+      const redirect = route.query.redirect
+      if (redirect) {
+        // 如果存在redirect参数，跳转到指定路径
+        router.push(decodeURIComponent(redirect))
+      } else {
+        // 否则跳转到默认的管理后台首页
+        router.push({ name: 'admin.dashboard' })
+      }
     } else {
       errorMessage.value = '登录失败，请检查用户名和密码'
     }
@@ -227,6 +250,37 @@ const handleLogin = async () => {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+.remember-group {
+  margin-top: -8px;
+  margin-bottom: -8px;
+}
+
+.remember-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  gap: 8px;
+}
+
+.remember-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #667eea;
+  flex-shrink: 0;
+}
+
+.remember-text {
+  font-size: 14px;
+  color: #666;
+  font-weight: 400;
+}
+
+.remember-label:hover .remember-text {
+  color: #333;
 }
 
 .error-message {

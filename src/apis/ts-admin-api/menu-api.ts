@@ -128,8 +128,8 @@ export const menuAPI = {
    * 获取树形菜单列表
    * @returns {Promise<APIResponse<Menu[]>>} 返回菜单树数据
    */
-  getTreeMenu: (): Promise<APIResponse<Menu[]>> => {
-    return adminAPIClient.get(`/admin-api/v1/treeMenu`)
+  getTree: (): Promise<APIResponse<Menu[]>> => {
+    return adminAPIClient.get(`/admin-api/v1/menu/tree`)
   },
 
   /**

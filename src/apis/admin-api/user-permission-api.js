@@ -2,7 +2,39 @@ import adminAPIClient from '../request/admin-client.js'
 import { toastException } from '@/utils/toast.js'
 
 // 菜单权限相关 API 接口
-export const menuPermissionAPI = {
+export const userPermissionAPI = {
+  /**
+   * 获取当前用户菜单权限配置
+   * @param {Object} params - 查询参数
+   * @param {number} params.system_id - 子系统ID
+   * @returns {Promise} 返回当前用户权限配置的 Promise
+   * 
+   * 返回数据结构：
+   * {
+   *   isRoot: boolean,
+   *   routesActions: Array<{
+   *     path: string,
+   *     actions: string[]
+   *   }>
+   * }
+   * 
+   * 示例：
+   * {
+   *   "isRoot": false,
+   *   "routesActions": [
+   *     {
+   *       "path": "/admin/demo",
+   *       "actions": ["add", "del"]
+   *     }
+   *   ]
+   * }
+   */
+  my:(params) => {
+    return adminAPIClient.get('/admin-api/v1/user_permission/my', params)
+  },
+
+
+
   /**
    * 获取菜单权限详情
    * @param {Object} params - 查询参数
@@ -13,7 +45,7 @@ export const menuPermissionAPI = {
    * 返回数据结构：
    * {
    *   form: { system_id: number, user_id: number },
-   *   is_admin: boolean,
+   *   is_root: boolean,
    *   system_menu: Array<{
    *     // Menu 字段
    *     id: number,
@@ -42,8 +74,8 @@ export const menuPermissionAPI = {
    *   }
    * }
    */
-  detail: (params) => {
-    return adminAPIClient.get('/admin-api/v1/menu_permission/detail', params)
+  config: (params) => {
+    return adminAPIClient.get('/admin-api/v1/user_permission/config', params)
   },
 
   /**
@@ -55,8 +87,8 @@ export const menuPermissionAPI = {
    * @param {number[]} data.operation_id_list - 操作ID列表
    * @returns {Promise} 返回设置结果的 Promise
    */
-  setPermission: (data) => {
-    return adminAPIClient.post('/admin-api/v1/menu_permission/setPermission', data)
+  save: (data) => {
+    return adminAPIClient.post('/admin-api/v1/user_permission/save', data)
   },
 }
 
@@ -67,16 +99,16 @@ export const menuPermissionAPI = {
  * @param {number} params.user_id - 用户ID
  * @returns {Promise<Object|null>} 返回菜单权限详情，异常时返回 null
  */
-const menuPermissionDetail = async (params) => {
+const userPermissionConfig = async (params) => {
   try {
-    const response = await menuPermissionAPI.detail(params)
+    const response = await userPermissionAPI.config(params)
     return response?.data || response
   } catch (error) {
-    toastException(error, '获取菜单权限详情失败')
+    toastException(error, '获取菜单权限配置失败')
     return null
   }
 }
 
 // 默认导出
-export default menuPermissionAPI
-export { menuPermissionDetail }
+export default userPermissionAPI
+export { userPermissionConfig }

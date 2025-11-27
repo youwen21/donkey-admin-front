@@ -4,7 +4,6 @@ import HomeView from '../views/HomeView.vue'
 import AdminLayout from '../views/layout/AdminLayout.vue'
 import LoginView from '../views/admin/LoginView.vue'
 import DashboardView from '../views/admin/DashboardView.vue'
-import UserView from '../views/admin/UserView.vue'
 import UserList from '../views/admin/user/UserList.vue'
 import UserAdd from '../views/admin/user/UserAdd.vue'
 import UserEdit from '../views/admin/user/UserEdit.vue'
@@ -24,6 +23,7 @@ import OperationList from '../views/admin/operation/OperationList.vue'
 import OperationAdd from '../views/admin/operation/OperationAdd.vue'
 import OperationEdit from '../views/admin/operation/OperationEdit.vue'
 import UserPermission from '../views/admin/permission/UserPermission.vue'
+import ApprovalList from '../views/admin/approval/ApprovalList.vue'
 import NotFoundView from '../views/admin/NotFoundView.vue'
 
 const router = createRouter({
@@ -43,8 +43,8 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue'),
     },
     {
-        path: '/admin/login',
-        name: 'admin.login',
+        path: '/login',
+        name: 'login',
         component: LoginView,
     },
     {
@@ -79,30 +79,30 @@ const router = createRouter({
           },
           component: () => import('../views/admin/DashboardView.vue'),
         },
-        {
-          path: 'users',
-          name: 'admin.users',
-          meta: { requiresAdmin: true },
-          beforeEnter: (to, from) => {
-            console.log("admin user beforeEnter")
-            console.log('admin user to', to)
-            console.log('admin user from', from)
-            // permission.setPermissions({
-            //   "isAdmin": false,
-            //   "routesActions": [
-            //     {
-            //       "path": "/admin/demo/2222222",
-            //       "actions": [
-            //         "add",
-            //         "edit",
-            //         "del",
-            //       ],
-            //     },
-            //   ],
-            // })
-          },
-          component: UserView,
-        },
+        // {
+        //   path: 'users',
+        //   name: 'admin.users',
+        //   meta: { requiresAdmin: true },
+        //   beforeEnter: (to, from) => {
+        //     console.log("admin user beforeEnter")
+        //     console.log('admin user to', to)
+        //     console.log('admin user from', from)
+        //     // permission.setPermissions({
+        //     //   "isAdmin": false,
+        //     //   "routesActions": [
+        //     //     {
+        //     //       "path": "/admin/demo/2222222",
+        //     //       "actions": [
+        //     //         "add",
+        //     //         "edit",
+        //     //         "del",
+        //     //       ],
+        //     //     },
+        //     //   ],
+        //     // })
+        //   },
+        //   component: UserView,
+        // },
         {
           path: 'user/list',
           name: 'admin.user.list',
@@ -112,13 +112,13 @@ const router = createRouter({
         {
           path: 'user/add',
           name: 'admin.user.add',
-          meta: { requiresAdmin: true },
+          meta: { requiresAdmin: true , 'activeNodePath': '/admin/user/list'},
           component: UserAdd,
         },
         {
           path: 'user/edit/:id',
           name: 'admin.user.edit',
-          meta: { requiresAdmin: true },
+          meta: { requiresAdmin: true , 'activeNodePath': '/admin/user/list'},
           component: UserEdit,
         },
         {
@@ -221,6 +221,12 @@ const router = createRouter({
           name: 'admin.permission.user',
           meta: { requiresAdmin: true },
           component: UserPermission,
+        },
+        {
+          path: 'approval/list',
+          name: 'admin.approval.list',
+          meta: { requiresAdmin: true },
+          component: ApprovalList,
         },
         {
           path: ':pathMatch(.*)*',

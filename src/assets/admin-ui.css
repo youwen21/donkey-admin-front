@@ -1,0 +1,392 @@
+/* Admin UI 通用样式 */
+
+/* ========== 通用容器样式 ========== */
+/* 列表页面容器 */
+[class$="-list"] {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 表单页面容器 */
+[class$="-form"] {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ========== 工具栏样式 ========== */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.toolbar-left {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+}
+
+.toolbar-right {
+  display: flex;
+  gap: 12px;
+}
+
+.search-input {
+  flex: 1;
+  max-width: 300px;
+  padding: 8px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #1890ff;
+}
+
+.status-select {
+  padding: 8px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: #1890ff;
+}
+
+/* ========== 按钮样式 ========== */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary {
+  background: #1890ff;
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #40a9ff;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #333;
+  border: 1px solid #d9d9d9;
+}
+
+.btn-secondary:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.btn-search {
+  background: #fff;
+  color: #333;
+  border: 1px solid #d9d9d9;
+}
+
+.btn-search:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.btn-icon {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* ========== 表单样式 ========== */
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.form-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-container {
+  max-width: 800px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.required {
+  color: #ff4d4f;
+  margin-right: 4px;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #1890ff;
+}
+
+.form-input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.form-select {
+  background: #fff;
+  cursor: pointer;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #999;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e8e8e8;
+}
+
+/* ========== 表格样式 ========== */
+.table-container {
+  overflow-x: auto;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.data-table thead {
+  background: #fafafa;
+}
+
+.data-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #e8e8e8;
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #666;
+}
+
+.data-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.data-table tbody tr.disabled-row {
+  opacity: 0.6;
+  background: #f5f5f5;
+}
+
+.loading-row,
+.empty-row {
+  text-align: center;
+}
+
+.loading-cell,
+.empty-cell {
+  text-align: center;
+  color: #999;
+  padding: 40px;
+}
+
+/* ========== 状态徽章样式 ========== */
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 12px;
+}
+
+.status-active {
+  background: #f6ffed;
+  color: #52c41a;
+  border: 1px solid #b7eb8f;
+}
+
+.status-inactive {
+  background: #fff2e8;
+  color: #fa8c16;
+  border: 1px solid #ffd591;
+}
+
+/* ========== 操作按钮样式 ========== */
+.action-cell {
+  white-space: nowrap;
+  gap: 8px;
+}
+
+/* 基础操作按钮样式 */
+.btn-action {
+  padding: 4px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin:0 6px;
+}
+
+/* 编辑按钮 */
+.btn-edit {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.btn-edit:hover {
+  background: #bae7ff;
+}
+
+/* 删除按钮（禁用/启用状态切换） */
+.btn-delete {
+  background: #fff7e6;
+  color: #fa8c16;
+}
+
+.btn-delete:hover {
+  background: #ffe7ba;
+}
+
+/* 移除按钮（永久删除） */
+.btn-remove {
+  background: #fff1f0;
+  color: #ff4d4f;
+}
+
+.btn-remove:hover {
+  background: #ffccc7;
+}
+
+/* 权限管理按钮 */
+.btn-permission {
+  background: #f6ffed;
+  color: #52c41a;
+  border: 1px solid #b7eb8f;
+}
+
+.btn-permission:hover {
+  background: #d9f7be;
+  border-color: #95de64;
+  color: #389e0d;
+}
+
+/* 新增按钮（如果单独使用） */
+.btn-add {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.btn-add:hover {
+  background: #bae7ff;
+}
+
+/* 兼容旧样式：有边框的操作按钮（用于某些场景） */
+.btn-action-bordered {
+  padding: 4px 12px;
+  margin-right: 8px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background: #fff;
+  color: #333;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-action-bordered:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+/* ========== 其他通用样式 ========== */
+.tree-indent {
+  color: #d9d9d9;
+  margin-right: 4px;
+}
+
+.path-cell {
+  font-family: monospace;
+  font-size: 12px;
+  color: #999;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.code-cell {
+  font-family: monospace;
+  font-size: 12px;
+}
+

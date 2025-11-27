@@ -1,9 +1,10 @@
 <template>
+  
   <div class="org-list">
     <!-- 搜索和操作栏 -->
     <div class="toolbar">
-      <!-- <div class="toolbar-left">
-        <input
+      <div class="toolbar-left">
+        <!-- <input
           v-model="searchKeyword"
           type="text"
           class="search-input"
@@ -17,16 +18,16 @@
         </select>
         <button class="btn btn-search" @click="handleSearch">
           查询
-        </button>
-      </div> -->
+        </button> -->
+      </div>
       <div class="toolbar-right">
-        <button class="btn btn-primary" @click="handleAdd">
+        <button class="btn btn-primary" @click="handleAdd" v-if="$checkActionPerm('btn-add')">
           <span class="btn-icon">+</span>
           新增组织
         </button>
       </div>
     </div>
-
+ 
     <!-- 表格 -->
     <div class="table-container">
       <table class="data-table">
@@ -77,6 +78,7 @@
             <td>{{ formatDateTime(item.update_time) }}</td>
             <td class="action-cell">
               <button class="btn-action btn-edit" @click="handleEdit(item)">编辑</button>
+              
               <button
                 v-if="item.status !== 0"
                 class="btn-action btn-delete"
@@ -84,13 +86,16 @@
               >
                 {{ item.status === 1 ? '禁用' : '启用' }}
               </button>
-              <button
-                v-if="item.status !== 0"
-                class="btn-action btn-remove"
-                @click="handleDeleteItem(item)"
-              >
-                删除
-              </button>
+              <template v-if="$checkActionPerm('btn-del')">
+                <button
+                  v-if="item.status !== 0"
+                  class="btn-action btn-remove"
+                  @click="handleDeleteItem(item)"
+                >
+                  删除
+                </button>
+              </template>
+              
             </td>
           </tr>
         </tbody>
@@ -233,223 +238,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.org-list {
-  background: #fff;
-  border-radius: 8px;
-  padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  gap: 16px;
-}
-
-.toolbar-left {
-  display: flex;
-  gap: 12px;
-  flex: 1;
-}
-
-.search-input {
-  flex: 1;
-  max-width: 300px;
-  padding: 8px 12px;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: border-color 0.3s;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #1890ff;
-}
-
-.status-select {
-  padding: 8px 12px;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  font-size: 14px;
-  background: #fff;
-  cursor: pointer;
-  transition: border-color 0.3s;
-}
-
-.status-select:focus {
-  outline: none;
-  border-color: #1890ff;
-}
-
-.btn-search {
-  background: #1890ff;
-  color: #fff;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.btn-search:hover {
-  background: #40a9ff;
-}
-
-.toolbar-right {
-  display: flex;
-  gap: 12px;
-}
-
-.btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.btn-primary {
-  background: #1890ff;
-  color: #fff;
-}
-
-.btn-primary:hover {
-  background: #40a9ff;
-}
-
-.btn-icon {
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.table-container {
-  overflow-x: auto;
-  border: 1px solid #e8e8e8;
-  border-radius: 4px;
-}
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-.data-table thead {
-  background: #fafafa;
-}
-
-.data-table th {
-  padding: 12px 16px;
-  text-align: left;
-  font-weight: 600;
-  color: #333;
-  border-bottom: 1px solid #e8e8e8;
-  white-space: nowrap;
-}
-
-.data-table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #f0f0f0;
-  color: #666;
-}
-
-.data-table tbody tr:hover {
-  background: #fafafa;
-}
-
-.data-table tbody tr.disabled-row {
-  opacity: 0.6;
-  background: #f5f5f5;
-}
-
-.loading-cell,
-.empty-cell {
-  text-align: center;
-  color: #999;
-  padding: 40px;
-}
-
-.tree-indent {
-  color: #d9d9d9;
-  margin-right: 4px;
-}
-
-.path-cell {
-  font-family: monospace;
-  font-size: 12px;
-  color: #999;
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.status-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 2px;
-  font-size: 12px;
-}
-
-.status-active {
-  background: #f6ffed;
-  color: #52c41a;
-  border: 1px solid #b7eb8f;
-}
-
-.status-inactive {
-  background: #fff2e8;
-  color: #fa8c16;
-  border: 1px solid #ffd591;
-}
-
-.action-cell {
-  white-space: nowrap;
-}
-
-.btn-action {
-  padding: 4px 12px;
-  margin-right: 8px;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  background: #fff;
-  color: #333;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.btn-action:hover {
-  border-color: #1890ff;
-  color: #1890ff;
-}
-
-.btn-edit:hover {
-  background: #e6f7ff;
-}
-
-.btn-delete:hover {
-  background: #fff1f0;
-  border-color: #ff4d4f;
-  color: #ff4d4f;
-}
-
-.btn-remove {
-  border-color: #ff4d4f;
-  color: #ff4d4f;
-}
-
-.btn-remove:hover {
-  background: #fff1f0;
-  border-color: #ff4d4f;
-  color: #ff4d4f;
-}
+/* 样式已提取到 assets/admin-ui.css，此处仅保留页面特有的样式 */
 </style>
