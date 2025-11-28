@@ -3,13 +3,13 @@
     <!-- 搜索和操作栏 -->
     <div class="toolbar">
       <div class="toolbar-left">
-        <input
+        <!-- <input
           v-model="searchKeyword"
           type="text"
           class="search-input"
           placeholder="搜索菜单名称"
           @keyup.enter="handleSearch"
-        />
+        /> -->
         <select v-model="statusFilter" class="status-select">
           <option value="">全部状态</option>
           <option value="1">有效</option>

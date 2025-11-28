@@ -3,13 +3,13 @@
     <!-- 搜索和操作栏 -->
     <div class="toolbar">
       <div class="toolbar-left">
-        <input
+        <!-- <input
           v-model="searchKeyword"
           type="text"
           class="search-input"
           placeholder="搜索操作名称/编号"
           @keyup.enter="handleSearch"
-        />
+        /> -->
         <select v-model="statusFilter" class="status-select">
           <option value="">全部状态</option>
           <option value="1">有效</option>
@@ -55,8 +55,8 @@
             <th>ID</th>
             <th>操作名称</th>
             <th>操作编号</th>
-            <th>子系统</th>
-            <th>菜单</th>
+            <th>所属系统</th>
+            <th>所属菜单</th>
             <th>状态</th>
             <th>排序</th>
             <th>创建时间</th>
