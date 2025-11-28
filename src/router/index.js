@@ -52,9 +52,9 @@ const router = createRouter({
       name: 'admin',
       component: AdminLayout,
       beforeEnter: (to, from) => {
-        console.log("admin beforeEnter")
-        console.log('admin beforeEnter to', to)
-        console.log('admin beforeEnter from', from)
+        // console.log("admin beforeEnter")
+        // console.log('admin beforeEnter to', to)
+        // console.log('admin beforeEnter from', from)
       },
       meta: { requiresAdmin: true },
 
@@ -125,11 +125,6 @@ const router = createRouter({
           path: 'org/list',
           name: 'admin.org.list',
           meta: { requiresAdmin: true },
-          beforeEnter: (to, from) => {
-            console.log("admin org list beforeEnter")
-            console.log('admin org list to', to)
-            console.log('admin org list from', from)
-          },
           component: OrgList,
         },
         {

@@ -112,7 +112,9 @@ export const createPermissionPlug = (opts) => {
         },
 
         permissionsIsSet() {
-            console.log("permissionsIsSet", this.permissions)
+            if (this.isDev()) {
+                console.log("permissionsIsSet", this.permissions)
+            }
             
             return this.permissions && Object.keys(this.permissions).length > 0
         },
@@ -141,7 +143,7 @@ export const createPermissionPlug = (opts) => {
 
         checkActionPerm(action) {
             const currentRoute = this.app.config.globalProperties.$route
-            return this.checkRouteActionPerm(currentRoute.path, action)
+            return this.checkPathActionPerm(currentRoute.path, action)
         },
 
         checkPathActionPerm(path, action) {
