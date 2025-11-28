@@ -64,7 +64,7 @@
             <th>邮箱</th>
             <th>手机号</th>
             <th>状态</th>
-            <th>角色</th>
+            <!-- <th>角色</th> -->
             <th>所属组织</th>
             <th>创建时间</th>
             <th>更新时间</th>
@@ -105,7 +105,7 @@
                 {{ item.status === 1 ? '在职' : '离职' }}
               </span>
             </td>
-            <td>{{ getRoleName(item.role_id) }}</td>
+            <!-- <td>{{ getRoleName(item.role_id) }}</td> -->
             <td>{{ getOrgName(item.org_id) }}</td>
             <td>{{ formatDateTime(item.create_time) }}</td>
             <td>{{ formatDateTime(item.update_time) }}</td>
