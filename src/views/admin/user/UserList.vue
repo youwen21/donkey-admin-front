@@ -25,6 +25,19 @@
             {{ role.name }}
           </option>
         </select> -->
+
+
+        <select v-model="orgIdFilter" class="status-select">
+          <option value="">全部</option>
+          <option
+            v-for="org in orgList"
+            :key="org.id"
+            :value="org.id"
+          >
+            {{ getOrgDisplayName(org) }}
+          </option>
+        </select>
+
         <button class="btn btn-search" @click="handleSearch">
           查询
         </button>
@@ -157,6 +170,7 @@ const loading = ref(false)
 const searchKeyword = ref('')
 const statusFilter = ref('')
 const roleFilter = ref('')
+const orgIdFilter = ref('')
 const currentPage = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
@@ -193,6 +207,10 @@ const fetchUserList = async () => {
     
     if (roleFilter.value) {
       params.role_id = parseInt(roleFilter.value)
+    }
+    
+    if (orgIdFilter.value) {
+      params.org_id = parseInt(orgIdFilter.value)
     }
     
     const response = await userAPI.query(params)
@@ -269,6 +287,18 @@ const getOrgName = (orgId) => {
   const org = orgList.value.find(item => item.id === orgId)
   return org ? org.name : '-'
 }
+
+// 获取组织显示名称（用于下拉框，显示层级关系）
+const getOrgDisplayName = (org) => {
+  if (org.level === 0) {
+    return org.name
+  }
+  // 使用非断行空格（\u00A0）实现缩进，每级缩进 4 个非断行空格
+  const indent = '\u00A0\u00A0\u00A0\u00A0'.repeat(org.level)
+  const prefix = '└─ '
+  return `${indent}${prefix}${org.name}`
+}
+
 
 const handleSearch = () => {
   currentPage.value = 1

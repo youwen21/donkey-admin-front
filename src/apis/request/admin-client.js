@@ -4,7 +4,8 @@
 const requestConfig = {
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000',
   timeout: 10000,
-  withCredentials: true, // 请求携带cookie
+  // withCredentials: true, // 请求携带cookie
+  credentials: 'include', // fetch请求携带cookie
   headers: {
     'Content-Type': 'application/json'
   },
@@ -212,7 +213,7 @@ class AdminAPIClient {
       }
       
       // 如果配置了 withCredentials，则携带 cookie
-      if (this.config.withCredentials || interceptedConfig.withCredentials) {
+      if (this.config.credentials || interceptedConfig.credentials) {
         fetchOptions.credentials = 'include'
       }
       

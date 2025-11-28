@@ -17,21 +17,39 @@
 ### 代码规范
 - **ESLint** - JavaScript 代码检查工具
 
+### UI 组件库
+- **SweetAlert2** (^11.26.3) - 美观的弹窗提示组件
+
+### 运行环境
+- **Node.js** ^20.19.0 || >=22.12.0
+
+
 ## 项目结构
 
 ```
 src/
 ├── apis/              # API 接口
 │   ├── admin-api/    # 管理后台 API
-│   └── request/      # 请求封装
+│   ├── request/      # 请求封装（客户端、工具函数）
+│   └── ts-admin-api/ # TypeScript API（开发中）
 ├── components/        # 组件
-│   └── admin/        # 管理后台组件
+│   ├── admin/        # 管理后台组件（Header、SideMenu、MenuItem）
+│   └── icons/        # 图标组件
 ├── views/             # 页面视图
-│   └── admin/         # 管理后台页面
+│   ├── admin/         # 管理后台页面
+│   │   ├── user/      # 用户管理
+│   │   ├── role/      # 角色管理
+│   │   ├── org/       # 组织管理
+│   │   ├── menu/      # 菜单管理
+│   │   ├── operation/ # 操作管理
+│   │   ├── subsystem/ # 子系统管理
+│   │   ├── permission/# 权限管理
+│   │   └── approval/  # 审批管理
+│   └── layout/        # 布局组件
 ├── router/            # 路由配置
-├── plugins/           # 插件
-├── utils/             # 工具函数
-└── assets/            # 静态资源
+├── plugins/           # 插件（权限插件）
+├── utils/             # 工具函数（日期、提示等）
+└── assets/            # 静态资源（CSS、图片等）
 ```
 
 ## 核心模块

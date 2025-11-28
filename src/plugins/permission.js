@@ -1,7 +1,7 @@
 
 const permissionsDemo = {
     "isRoot": false,
-    "routesActions": [
+    "menuActions": [
         {
             "id": 1,
             "url": "",
@@ -71,8 +71,8 @@ export const createPermissionPlug = (opts) => {
 
             // 提供全局方法 (函数)
             app.config.globalProperties.$checkActionPerm = (action) => this.checkActionPerm(action)
-            app.config.globalProperties.$checkRoutePerm = (path) => this.checkRoutePerm(path)
-            app.config.globalProperties.$checkRouteActionPerm = (path, action) => this.checkRouteActionPerm(path, action)
+            app.config.globalProperties.$checkPathPerm = (path) => this.checkPathPerm(path)
+            app.config.globalProperties.$checkPathActionPerm = (path, action) => this.checkPathActionPerm(path, action)
 
             // 注入一个全局可用的 $translate() 方法
             // app.config.globalProperties.$translate = (key) => {
@@ -117,9 +117,9 @@ export const createPermissionPlug = (opts) => {
             return this.permissions && Object.keys(this.permissions).length > 0
         },
 
-        checkRoutePerm(path) {
+        checkPathPerm(path) {
             if (this.isDev()) {
-                console.log('check route permission', path);
+                console.log('check route path permission', path);
                 console.log("permission data", this.permissions)
             }
 
@@ -130,10 +130,8 @@ export const createPermissionPlug = (opts) => {
                 return true
             }
 
-            const permissions = this.permissions
-            const routesActions = permissions.routesActions
-            for (const routeAction of routesActions) {
-                const menuPath = this.getMenuPath(routeAction.url)
+            for (const menuAction of this.permissions.menuActions) {
+                const menuPath = this.getMenuPath(menuAction.url)
                 if (menuPath === path) {
                     return true
                 }
@@ -146,9 +144,9 @@ export const createPermissionPlug = (opts) => {
             return this.checkRouteActionPerm(currentRoute.path, action)
         },
 
-        checkRouteActionPerm(path, action) {
+        checkPathActionPerm(path, action) {
             if (this.isDev()) {
-                console.log('check route button permission', path, action);
+                console.log('check route path button permission', path, action);
                 console.log("permission data", this.permissions)
             }
 
@@ -159,21 +157,23 @@ export const createPermissionPlug = (opts) => {
                 return true
             }
 
-            if (!this.permissions.routesActions) {
+            if (!this.permissions.menuActions) {
                 return false
             }
 
             
-            const routerPerm = this.permissions.routesActions.find(routeAction => {
-                const menuPath = this.getMenuPath(routeAction.url)
+            const menuAction = this.permissions.menuActions.find(item => {
+                const menuPath = this.getMenuPath(item.url)
                 return menuPath === path
             })
-            if (!routerPerm) {
+            if (!menuAction) {
                 return false
             }
 
-            const actions = routerPerm.actions
-            return actions.includes(action)
+            if (!menuAction.actions) {
+                return false
+            }
+            return menuAction.actions.includes(action)
         },
 
         // 获取菜单路径, item.url格式 是 /xxx/xxx 或者  /xxx/xxx?param=value, 返回 /xxx/xxx
