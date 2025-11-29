@@ -70,4 +70,4 @@
 Private
 
 # 预览
-![管理后台预览](./docs/images/user-list.jpg)
+![管理后台预览](./docs/images/org-list.jpg)
