@@ -7,7 +7,7 @@ export const myAPI = {
    * @returns {Promise<Object>} 返回员工信息的 Promise
    * @returns {Promise<Object>} response - 响应对象
    * @returns {number} response.code - 状态码
-   * @returns {string} response.msg - 消息
+   * @returns {string} response.message - 消息
    * @returns {Object} response.data - 员工信息数据
    * @returns {number} response.data.id - 员工ID
    * @returns {string} response.data.name - 登录名

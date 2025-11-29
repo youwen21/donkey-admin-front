@@ -190,7 +190,7 @@ const handleDeleteItem = async (item) => {
       })
 
       if (response?.code !== 0) {
-        toastError(response?.msg || '删除失败')
+        toastError(response?.message || '删除失败')
         return
       }
   

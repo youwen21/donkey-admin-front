@@ -83,6 +83,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { orgAPI } from '@/apis/admin-api/organization-api.js'
+import { toastSuccess, toastError, toastWarning, toastException } from '@/utils/toast.js'
+
 
 const router = useRouter()
 const route = useRoute()
@@ -142,7 +144,7 @@ const fetchOrgList = async () => {
 const fetchOrgDetail = async () => {
   const id = route.params.id
   if (!id) {
-    alert('缺少组织ID')
+    toastError('缺少组织ID')
     router.push({ name: 'admin.org.list' })
     return
   }
@@ -164,7 +166,7 @@ const fetchOrgDetail = async () => {
     }
   } catch (error) {
     console.error('获取组织详情失败:', error)
-    alert('获取组织详情失败，请稍后重试')
+    toastException(error, '获取组织详情失败')
     router.push({ name: 'admin.org.list' })
   } finally {
     loading.value = false
@@ -189,33 +191,25 @@ const getOrgDisplayName = (org) => {
 // 处理提交
 const handleSubmit = async () => {
   if (!formData.value.name.trim()) {
-    alert('请输入组织名称')
+    toastWarning('请输入组织名称')
     return
   }
 
   loading.value = true
   try {
-    // 如果 parent_id 改变，需要重新计算 level 和 path 后台处理path字段
-    // if (formData.value.parent_id > 0) {
-    //   const parent = orgList.value.find(org => org.id === formData.value.parent_id)
-    //   if (parent) {
-    //     formData.value.level = (parent.level || 0) + 1
-    //     formData.value.node_path = parent.node_path ? `${parent.node_path}/${parent.id}` : `${parent.id}`
-    //   }
-    // } else {
-    //   formData.value.level = 0
-    //   formData.value.node_path = ''
-    // }
-
-    await orgAPI.update(formData.value)
-    alert('更新成功')
-    router.push({ name: 'admin.org.list' })
+    const  response = await orgAPI.update(formData.value)
+    if (response.code === 0) {
+      toastSuccess('更新成功')
+      router.push({ name: 'admin.org.list' })
+    } else {
+      toastError(response?.message || '更新失败')
+    }
   } catch (error) {
     console.error('更新组织失败:', error)
-    alert('更新失败，请稍后重试')
+    toastException(error, '更新失败')
   } finally {
     loading.value = false
-  }
+  } 
 }
 
 // 处理取消

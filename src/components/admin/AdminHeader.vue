@@ -185,7 +185,7 @@ const fetchCurrentUser = async () => {
         status: response.data.status
       }
     } else {
-      console.warn('获取用户信息失败:', response?.msg || '未知错误')
+      console.warn('获取用户信息失败:', response?.message || '未知错误')
       // 如果 API 失败，尝试从 localStorage 获取
       const userStr = localStorage.getItem('currentUser')
       if (userStr) {

@@ -42,7 +42,7 @@ const fetchMenuData = async () => {
 
     // {"code":9999,"msg":"record not found","data":null}
     if (response.code !== 0) {
-      toastException("获取菜单数据失败", response.msg)
+      toastException("获取菜单数据失败", response.message)
       return
     }
 
@@ -60,7 +60,7 @@ const fetchMenuData = async () => {
 const fetchUserPermission = async () => {
   const response = await userPermissionAPI.my()
   if (response.code !== 0) {
-    toastException("获取用户权限失败", response.msg)
+    toastException("获取用户权限失败", response.message)
     return
   }
   permissionPlugInstance.setPermissions(response.data)

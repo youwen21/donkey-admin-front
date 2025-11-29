@@ -130,25 +130,13 @@ export const toastException = (error, title = '操作失败') => {
   }
   // 如果是对象
   else if (error && typeof error === 'object') {
-    // 优先取 response.data.msg（API 响应错误）
-    if (error.response?.data?.msg) {
-      message = error.response.data.msg
-    }
-    // 其次取 response.data.message
-    else if (error.response?.data?.message) {
+    // 优先取 response.data.message 响应错误）
+    if (error.response?.data?.message) {
       message = error.response.data.message
-    }
-    // 取 data.msg
-    else if (error.data?.msg) {
-      message = error.data.msg
     }
     // 取 data.message
     else if (error.data?.message) {
       message = error.data.message
-    }
-    // 取 msg
-    else if (error.msg) {
-      message = error.msg
     }
     // 取 message
     else if (error.message) {

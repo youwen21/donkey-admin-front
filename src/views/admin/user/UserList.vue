@@ -356,7 +356,7 @@ const handleDeleteItem = async (item) => {
       })
 
       if (response.code !== 0) {
-        toastError(response.msg)
+        toastError(response.message)
         return
       }
   
