@@ -1,9 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 
 import AdminLayout from '../views/layout/AdminLayout.vue'
 import LoginView from '../views/admin/LoginView.vue'
-import DashboardView from '../views/admin/DashboardView.vue'
 import UserList from '../views/admin/user/UserList.vue'
 import UserAdd from '../views/admin/user/UserAdd.vue'
 import UserEdit from '../views/admin/user/UserEdit.vue'
@@ -32,7 +30,8 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView,
+      // component: HomeView,
+      redirect: { name: 'admin.dashboard' },
     },
     {
       path: '/about',
@@ -43,9 +42,9 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue'),
     },
     {
-        path: '/login',
-        name: 'login',
-        component: LoginView,
+      path: '/login',
+      name: 'login',
+      component: LoginView,
     },
     {
       path: '/admin',
@@ -55,6 +54,8 @@ const router = createRouter({
         // console.log("admin beforeEnter")
         // console.log('admin beforeEnter to', to)
         // console.log('admin beforeEnter from', from)
+        void to
+        void from
       },
       meta: { requiresAdmin: true },
 
@@ -73,7 +74,7 @@ const router = createRouter({
           name: 'admin.dashboard',
           meta: { requiresAdmin: true },
           beforeEnter: (to, from) => {
-            console.log("admin dashboard beforeEnter")
+            console.log('admin dashboard beforeEnter')
             console.log('admin dashboard to', to)
             console.log('admin dashboard from', from)
           },
@@ -112,13 +113,13 @@ const router = createRouter({
         {
           path: 'user/add',
           name: 'admin.user.add',
-          meta: { requiresAdmin: true , 'activeNodePath': '/admin/user/list'},
+          meta: { requiresAdmin: true, activeNodePath: '/admin/user/list' },
           component: UserAdd,
         },
         {
           path: 'user/edit/:id',
           name: 'admin.user.edit',
-          meta: { requiresAdmin: true , 'activeNodePath': '/admin/user/list'},
+          meta: { requiresAdmin: true, activeNodePath: '/admin/user/list' },
           component: UserEdit,
         },
         {
@@ -184,13 +185,13 @@ const router = createRouter({
         {
           path: 'menu/add',
           name: 'admin.menu.add',
-          meta: { requiresAdmin: true },
+          meta: { requiresAdmin: true , activeNodePath: '/admin/menu/list' },
           component: MenuAdd,
         },
         {
           path: 'menu/edit/:id',
           name: 'admin.menu.edit',
-          meta: { requiresAdmin: true },
+          meta: { requiresAdmin: true , activeNodePath: '/admin/menu/list' },
           component: MenuEdit,
         },
         {

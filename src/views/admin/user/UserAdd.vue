@@ -145,12 +145,12 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { userAPI } from '@/apis/admin-api/user-api.js'
-import { roleAPI } from '@/apis/admin-api/role-api.js'
-import { orgAPI } from '@/apis/admin-api/organization-api.js'
+import { userAPI } from '@/apis/admin-api/user-api'
+import { roleAPI } from '@/apis/admin-api/role-api'
+import { orgAPI } from '@/apis/admin-api/organization-api'
 
 const router = useRouter()
 

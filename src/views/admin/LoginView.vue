@@ -67,10 +67,10 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { authAPI } from '@/apis/admin-api/auth-api.js'
+import { authAPI } from '@/apis/admin-api/auth-api'
 
 const router = useRouter()
 const route = useRoute()
@@ -106,8 +106,8 @@ const handleLogin = async () => {
       // 登录成功，检查是否有redirect参数
       const redirect = route.query.redirect
       if (redirect) {
-        // 如果存在redirect参数，跳转到指定路径
-        router.push(decodeURIComponent(redirect))
+        const path = Array.isArray(redirect) ? redirect[0] : redirect
+        router.push(decodeURIComponent(path))
       } else {
         // 否则跳转到默认的管理后台首页
         router.push({ name: 'admin.dashboard' })
@@ -117,7 +117,8 @@ const handleLogin = async () => {
     }
   } catch (error) {
     console.error('Login error:', error)
-    errorMessage.value = error.message || '登录失败，请稍后重试'
+    errorMessage.value =
+      error instanceof Error ? error.message : '登录失败，请稍后重试'
   } finally {
     loading.value = false
   }

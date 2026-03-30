@@ -150,14 +150,14 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { userAPI } from '@/apis/admin-api/user-api.js'
-import { roleAPI } from '@/apis/admin-api/role-api.js'
-import { orgAPI } from '@/apis/admin-api/organization-api.js'
-import { formatDateTime } from '@/utils/date.js'
-import { confirm, toastSuccess, toastError, toastException } from '@/utils/toast.js'
+import { userAPI } from '@/apis/admin-api/user-api'
+import { roleAPI } from '@/apis/admin-api/role-api'
+import { orgAPI } from '@/apis/admin-api/organization-api'
+import { formatDateTime } from '@/utils/date'
+import { confirm, toastSuccess, toastError, toastException } from '@/utils/toast'
 import Pagination from '@/components/Pagination.vue'
 
 const router = useRouter()
@@ -187,9 +187,9 @@ const displayList = computed(() => {
 const fetchUserList = async () => {
   loading.value = true
   try {
-    const params = {
+    const params: Record<string, unknown> = {
       page: currentPage.value,
-      pageSize: pageSize.value
+      pageSize: pageSize.value,
     }
     
     // 添加搜索参数

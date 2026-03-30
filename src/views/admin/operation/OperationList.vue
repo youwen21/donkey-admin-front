@@ -125,22 +125,24 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { operationAPI, operationQuery } from '@/apis/admin-api/operation-api.js'
-import { subsystemFetchList } from '@/apis/admin-api/subsystem-api.js'
-import { menuFetchList } from '@/apis/admin-api/menu-api.js'
-import { formatDateTime } from '@/utils/date.js'
-import { toastSuccess, toastException, confirm } from '@/utils/toast.js'
+import { operationAPI } from '@/apis/admin-api/operation-api'
+import { subsystemAPI } from '@/apis/admin-api/subsystem-api'
+import { menuAPI } from '@/apis/admin-api/menu-api'
+import { formatDateTime } from '@/utils/date'
+import { toastSuccess, toastException, confirm } from '@/utils/toast'
 import Pagination from '@/components/Pagination.vue'
-
+import type { SubsystemExDTO } from '@/apis/admin-api/subsystem-types'
+import type { MenuExDTO } from '@/apis/admin-api/menu-types'
+import type { OperationExDTO } from '@/apis/admin-api/operation-types'
 const router = useRouter()
 
 // 数据
-const operationList = ref([])
-const subsystemList = ref([])
-const menuList = ref([])
+const operationList = ref<OperationExDTO[]>([])
+const subsystemList = ref<SubsystemExDTO[]>([])
+const menuList = ref<MenuExDTO[]>([])
 const loading = ref(false)
 const searchKeyword = ref('')
 const statusFilter = ref('')
@@ -168,20 +170,28 @@ const filteredMenuList = computed(() => {
 // 方法
 const fetchSubsystemList = async () => {
   try {
-    const result = await subsystemFetchList()
-    subsystemList.value = result.list || []
+    const response = await subsystemAPI.query({ page: 1, pageSize: 1000 })
+    if (response.code !== 0) {
+      toastException(response.message, '获取子系统列表失败')
+      return
+    }
+    subsystemList.value = response.data.list ?? []
   } catch (error) {
-    console.error('获取子系统列表失败:', error)
+    toastException(error, '获取子系统列表失败')
     subsystemList.value = []
   }
 }
 
 const fetchMenuList = async () => {
   try {
-    const result = await menuFetchList()
-    menuList.value = result.list || []
+    const response = await menuAPI.query({ page: 1, pageSize: 1000 })
+    if (response.code !== 0) {
+      toastException(response.message, '获取菜单列表失败')
+      return
+    }
+    menuList.value = response.data.list ?? []
   } catch (error) {
-    console.error('获取菜单列表失败:', error)
+    toastException(error, '获取菜单列表失败')
     menuList.value = []
   }
 }
@@ -189,21 +199,25 @@ const fetchMenuList = async () => {
 const fetchOperationList = async () => {
   loading.value = true
   try {
-    const params = {
+    const params: Record<string, unknown> = {
       page: currentPage.value,
       pageSize: pageSize.value,
       status: statusFilter.value === '' ? 0 : parseInt(statusFilter.value),
       system_id: systemFilter.value === '' ? 0 : parseInt(systemFilter.value),
-      menu_id: menuFilter.value === '' ? 0 : parseInt(menuFilter.value)
+      menu_id: menuFilter.value === '' ? 0 : parseInt(menuFilter.value),
     }
     // 如果有关键词，同时搜索名称和编号
     if (searchKeyword.value) {
       params.name = searchKeyword.value
       params.code = searchKeyword.value
     }
-    const result = await operationQuery(params)
-    operationList.value = result.list
-    total.value = result.total
+    const response = await operationAPI.query(params)
+    if (response.code !== 0) {
+      toastException(response.message, '获取操作列表失败')
+      return
+    }
+    operationList.value = response.data.list ?? []
+    total.value = response.data.total
   } finally {
     loading.value = false
   }
@@ -273,10 +287,14 @@ const handleSetStatus = async (item) => {
   
   if (await confirm(`确定要${action}操作"${item.name}"吗？`)) {
     try {
-      await operationAPI.setInfo({
+      const response = await operationAPI.setInfo({
         id: item.id,
         status: newStatus
       })
+      if (response.code !== 0) {
+        toastException(response.message, '更新失败')
+        return
+      }
       await fetchOperationList()
       toastSuccess(`${action}成功`)
     } catch (error) {

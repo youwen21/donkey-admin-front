@@ -97,11 +97,12 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { subsystemAPI, subsystemGet } from '@/apis/admin-api/subsystem-api.js'
-import { toastSuccess, toastException } from '@/utils/toast.js'
+import { subsystemAPI } from '@/apis/admin-api/subsystem-api'
+import { toastSuccess, toastException } from '@/utils/toast'
+import { routeParam } from '@/utils/route'
 
 const router = useRouter()
 const route = useRoute()
@@ -120,7 +121,7 @@ const formData = ref({
 
 // 获取子系统详情
 const fetchSubsystemDetail = async () => {
-  const id = route.params.id
+  const id = routeParam(route.params.id)
   if (!id) {
     toastException('缺少子系统ID', '参数错误')
     router.push({ name: 'admin.subsystem.list' })
@@ -129,21 +130,13 @@ const fetchSubsystemDetail = async () => {
 
   loading.value = true
   try {
-    const data = await subsystemGet({ id: parseInt(id) })
-    if (data) {
-      Object.assign(formData.value, {
-        id: data.id || 0,
-        name: data.name || '',
-        domain: data.domain || '',
-        syskey: data.syskey || '',
-        secret: data.secret || '',
-        status: data.status !== undefined ? data.status : 1,
-        order_no: data.order_no || 0
-      })
-    } else {
-      toastException('获取子系统详情失败', '数据错误')
-      router.push({ name: 'admin.subsystem.list' })
+    const response = await subsystemAPI.get({ id: parseInt(id, 10) })
+    if (response.code !== 0) {
+      toastException(response.message, '获取子系统详情失败')
+      return
     }
+    const data = response.data
+    Object.assign(formData.value, data)
   } catch (error) {
     toastException(error, '获取子系统详情失败')
     router.push({ name: 'admin.subsystem.list' })

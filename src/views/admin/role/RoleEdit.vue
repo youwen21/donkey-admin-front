@@ -43,11 +43,12 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { roleAPI, roleGet } from '@/apis/admin-api/role-api.js'
-import { toastSuccess, toastException } from '@/utils/toast.js'
+import { roleAPI } from '@/apis/admin-api/role-api'
+import { toastSuccess, toastException } from '@/utils/toast'
+import { routeParam } from '@/utils/route'
 
 const router = useRouter()
 const route = useRoute()
@@ -62,7 +63,7 @@ const formData = ref({
 
 // 获取角色详情
 const fetchRoleDetail = async () => {
-  const id = route.params.id
+  const id = routeParam(route.params.id)
   if (!id) {
     toastException('缺少角色ID', '参数错误')
     router.push({ name: 'admin.role.list' })
@@ -71,7 +72,12 @@ const fetchRoleDetail = async () => {
 
   loading.value = true
   try {
-    const data = await roleGet({ id: parseInt(id) })
+    const response = await roleAPI.get({ id: parseInt(id, 10) })
+    if (response.code !== 0) {
+      toastException(response.message, '获取角色详情失败')
+      return
+    }
+    const data = response.data
     if (data) {
       Object.assign(formData.value, {
         id: data.id || 0,

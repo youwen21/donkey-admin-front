@@ -18,16 +18,16 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import SideMenu from '@/components/admin/SideMenu.vue'
 import AdminHeader from '@/components/admin/AdminHeader.vue'
-import { menuAPI } from '@/apis/admin-api/menu-api.js'
-import { userPermissionAPI } from '@/apis/admin-api/user-permission-api.js'
+import { menuAPI } from '@/apis/admin-api/menu-api'
+import { userPermissionAPI } from '@/apis/admin-api/user-permission-api'
 
-import { toastException } from '@/utils/toast.js'
+import { toastException } from '@/utils/toast'
 
-import { permissionPlugInstance } from '@/plugins/permission.js'
+import { permissionPlugInstance } from '@/plugins/permission'
 
 // 菜单数据
 const menuData = ref([])
@@ -46,19 +46,17 @@ const fetchMenuData = async () => {
       return
     }
 
-    // 根据实际 API 响应结构调整
-    // 如果响应是 { data: [...] }，使用 response.data
-    // 如果响应直接是数组，使用 response
-    menuData.value = response?.data || response || []
+    const raw = response?.data ?? response
+    menuData.value = Array.isArray(raw) ? raw : []
   } catch (error) {
-    console.error('获取菜单数据失败:', error)
+    toastException(error, '获取菜单数据异常')
     // 失败时使用空数组，避免菜单组件报错
     menuData.value = []
   }
 }
 
 const fetchUserPermission = async () => {
-  const response = await userPermissionAPI.my()
+  const response = await userPermissionAPI.my({})
   if (response.code !== 0) {
     toastException("获取用户权限失败", response.message)
     return
@@ -81,8 +79,8 @@ const initPermissions = async () => {
 // 组件挂载时获取菜单数据和权限
 onMounted(async () => {
   await Promise.all([
-    fetchMenuData(),
     initPermissions(),
+    fetchMenuData(),
   ])
 })
 </script>

@@ -70,10 +70,10 @@
                 <div class="step-circle" :class="getStepCircleClass(step.status)">
                   <span v-if="step.status === 'completed'" class="step-check">✓</span>
                   <span v-else-if="step.status === 'rejected'" class="step-x">✗</span>
-                  <span v-else class="step-number">{{ index + 1 }}</span>
+                  <span v-else class="step-number">{{ Number(index) + 1 }}</span>
                 </div>
                 <div
-                  v-if="index < item.steps.length - 1"
+                  v-if="Number(index) < item.steps.length - 1"
                   class="step-line"
                   :class="getStepLineClass(step.status)"
                 ></div>
@@ -154,9 +154,9 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { formatDateTime } from '@/utils/date.js'
+import { formatDateTime } from '@/utils/date'
 import Pagination from '@/components/Pagination.vue'
 
 // 数据

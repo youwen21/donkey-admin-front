@@ -97,11 +97,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { subsystemAPI } from '@/apis/admin-api/subsystem-api.js'
-import { toastSuccess, toastException } from '@/utils/toast.js'
+import { subsystemAPI } from '@/apis/admin-api/subsystem-api'
+import { toastSuccess, toastException } from '@/utils/toast'
 
 const router = useRouter()
 

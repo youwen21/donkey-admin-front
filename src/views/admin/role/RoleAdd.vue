@@ -43,11 +43,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { roleAPI } from '@/apis/admin-api/role-api.js'
-import { toastSuccess, toastException } from '@/utils/toast.js'
+import { roleAPI } from '@/apis/admin-api/role-api'
+import { toastSuccess, toastException } from '@/utils/toast'
 
 const router = useRouter()
 

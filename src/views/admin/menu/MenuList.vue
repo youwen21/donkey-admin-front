@@ -128,20 +128,22 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { menuAPI, menuQuery } from '@/apis/admin-api/menu-api.js'
-import { subsystemFetchList } from '@/apis/admin-api/subsystem-api.js'
-import { formatDateTime } from '@/utils/date.js'
-import { toastSuccess, toastError, toastException, confirm } from '@/utils/toast.js'
+import { menuAPI } from '@/apis/admin-api/menu-api'
+import { subsystemAPI } from '@/apis/admin-api/subsystem-api'
+import { formatDateTime } from '@/utils/date'
+import { toastSuccess, toastError, toastException, confirm } from '@/utils/toast'
 import Pagination from '@/components/Pagination.vue'
+import type { SubsystemExDTO } from '@/apis/admin-api/subsystem-types'
+import type { MenuExDTO } from '@/apis/admin-api/menu-types'
 
 const router = useRouter()
 
 // 数据
-const menuList = ref([])
-const subsystemList = ref([])
+const subsystemList = ref<SubsystemExDTO[]>([])
+const menuList = ref<MenuExDTO[]> ([])
 const loading = ref(false)
 const searchKeyword = ref('')
 const statusFilter = ref('')
@@ -161,10 +163,14 @@ const displayList = computed(() => {
 // 方法
 const fetchSubsystemList = async () => {
   try {
-    const result = await subsystemFetchList()
-    subsystemList.value = result.list || []
+    const response = await subsystemAPI.query({ page: 1, pageSize: 1000 })
+    if (response.code !== 0) {
+      toastException(response.message, '获取子系统列表失败')
+      return
+    }
+    subsystemList.value = response.data.list ?? []
   } catch (error) {
-    console.error('获取子系统列表失败:', error)
+    toastException(error, '获取子系统列表失败')
     subsystemList.value = []
   }
 }
@@ -172,15 +178,19 @@ const fetchSubsystemList = async () => {
 const fetchMenuList = async () => {
   loading.value = true
   try {
-    const result = await menuQuery({
+    const response = await menuAPI.query({
       page: currentPage.value,
       pageSize: pageSize.value,
       name: searchKeyword.value || "",
       status: statusFilter.value === '' ? 0 : parseInt(statusFilter.value),
       system_id: systemFilter.value === '' ? 0 : parseInt(systemFilter.value)
     })
-    menuList.value = result.list
-    total.value = result.total
+    if (response.code !== 0) {
+      toastException(response.message, '获取菜单列表失败')
+      return
+    }
+    menuList.value = response.data.list
+    total.value = response.data.total
   } finally {
     loading.value = false
   }

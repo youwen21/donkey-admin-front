@@ -139,28 +139,32 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, watch, toRaw } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { subsystemFetchList } from '@/apis/admin-api/subsystem-api.js'
-import { userAPI, userGet } from '@/apis/admin-api/user-api.js'
-import { userPermissionAPI, userPermissionConfig } from '@/apis/admin-api/user-permission-api.js'
-import { confirm, toastSuccess, toastException, toastError } from '@/utils/toast.js'
+import { subsystemAPI } from '@/apis/admin-api/subsystem-api'
+import { userAPI } from '@/apis/admin-api/user-api'
+import type { SubsystemExDTO } from '@/apis/admin-api/subsystem-types'
+import type { UserExDTO } from '@/apis/admin-api/user-types'
+import type { MenuPermission } from '@/apis/admin-api/user-permission-types'
+import { userPermissionAPI } from '@/apis/admin-api/user-permission-api'
+import { confirm, toastSuccess, toastException, toastError } from '@/utils/toast'
+import { routeParam } from '@/utils/route'
 
 const route = useRoute()
 const router = useRouter()
 
 // 数据
-const subsystemList = ref([])
-const userInfo = ref(null)
+const subsystemList = ref<SubsystemExDTO[]>([])
+const userInfo = ref<UserExDTO>(null)
 const selectedSystemId = ref(0)
-const permissionData = ref(null)
+const permissionData = ref<MenuPermission>(null)
 const loading = ref(false)
 
 // 从路由参数获取用户ID
 const selectedUserId = computed(() => {
-  const userId = route.params.user_id || route.query.user_id
-  return userId ? parseInt(userId) : 0
+  const raw = routeParam(route.params.user_id) || routeParam(route.query.user_id)
+  return raw ? parseInt(raw, 10) : 0
 })
 
 // 计算属性
@@ -172,14 +176,18 @@ const canLoadPermission = computed(() => {
 // 获取子系统列表
 const fetchSubsystemList = async () => {
   try {
-    const result = await subsystemFetchList()
-    subsystemList.value = result.list || []
+    const response = await subsystemAPI.query({ page: 1, pageSize: 1000 })
+    if (response.code !== 0) {
+      toastException(response.message, '获取子系统列表失败')
+      return
+    }
+    subsystemList.value = response.data.list ?? []
     // 默认选择第一个子系统
     if (subsystemList.value.length > 0) {
       selectedSystemId.value = subsystemList.value[0].id
     }
   } catch (error) {
-    console.error('获取子系统列表失败:', error)
+    toastException(error, '获取子系统列表失败')
     subsystemList.value = []
   }
 }
@@ -193,14 +201,14 @@ const fetchUserInfo = async () => {
   }
 
   try {
-    const data = await userGet({ id: userId })
-    if (data) {
-      userInfo.value = data
-    } else {
-      toastError('获取用户信息失败', '数据错误')
+    const response = await userAPI.get({ id: userId })
+    if (response.code !== 0) {
+      toastException(response.message, '获取用户信息失败')
+      return
     }
+    const data = response.data
+    userInfo.value = data
   } catch (error) {
-    console.error('获取用户信息失败:', error)
     toastException(error, '获取用户信息失败')
   }
 }
@@ -213,13 +221,17 @@ const handleLoadPermission = async () => {
 
   loading.value = true
   try {
-    const data = await userPermissionConfig({
+    const response = await userPermissionAPI.config({
       system_id: selectedSystemId.value,
       user_id: selectedUserId.value
     })
-    permissionData.value = data
+    if (response.code !== 0) {
+      toastException(response.message, '加载权限数据失败')
+      return
+    }
+    permissionData.value = response.data ?? null
   } catch (error) {
-    console.error('加载权限数据失败:', error)
+    toastException(error, '加载权限数据失败')
     permissionData.value = null
   } finally {
     loading.value = false
@@ -334,7 +346,8 @@ const savePermission = async () => {
       system_id: selectedSystemId.value,
       user_id: selectedUserId.value,
       menu_id_list: permissionData.value.user_permissions.menu_id_list || [],
-      operation_id_list: permissionData.value.user_permissions.operation_id_list || []
+      operation_id_list: permissionData.value.user_permissions.operation_id_list || [],
+      operator_uid: 0,
     })
     toastSuccess('保存权限成功')
   } catch (error) {

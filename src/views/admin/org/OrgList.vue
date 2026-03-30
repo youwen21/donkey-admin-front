@@ -4,21 +4,6 @@
     <!-- 搜索和操作栏 -->
     <div class="toolbar">
       <div class="toolbar-left">
-        <!-- <input
-          v-model="searchKeyword"
-          type="text"
-          class="search-input"
-          placeholder="搜索组织名称"
-          @keyup.enter="handleSearch"
-        />
-        <select v-model="statusFilter" class="status-select">
-          <option value="">全部状态</option>
-          <option value="1">启用</option>
-          <option value="2">禁用</option>
-        </select>
-        <button class="btn btn-search" @click="handleSearch">
-          查询
-        </button> -->
       </div>
       <div class="toolbar-right">
         <button class="btn btn-primary" @click="handleAdd" v-if="$checkActionPerm('btn-add')">
@@ -115,21 +100,19 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { orgAPI, orgQuery } from '@/apis/admin-api/organization-api.js'
-import { formatDateTime } from '@/utils/date.js'
-import { confirm, toastSuccess, toastError, toastException } from '@/utils/toast.js'
+import { orgAPI, orgQuery } from '@/apis/admin-api/organization-api'
+import { formatDateTime } from '@/utils/date'
+import { confirm, toastSuccess, toastError, toastException } from '@/utils/toast'
 import Pagination from '@/components/Pagination.vue'
-
+import type { OrganizationExDTO } from '@/apis/admin-api/organization-types'
 const router = useRouter()
 
 // 数据
-const orgList = ref([])
+const orgList = ref<OrganizationExDTO[]>([])
 const loading = ref(false)
-const searchKeyword = ref('')
-const statusFilter = ref('')
 const currentPage = ref(1)
 const pageSize = ref(200)
 const total = ref(0)
@@ -146,14 +129,16 @@ const displayList = computed(() => {
 const fetchOrgList = async () => {
   loading.value = true
   try {
-    const result = await orgQuery({
+    const response = await orgAPI.query({
       page: currentPage.value,
       pageSize: pageSize.value,
-      name: searchKeyword.value || "",
-      status: statusFilter.value || 0
     })
-    orgList.value = result.list
-    total.value = result.total
+    if (response.code !== 0) {
+      toastException(response.message, '获取组织列表失败')
+      return
+    }
+    orgList.value = response.data.list ?? []
+    total.value = response.data.total
   } finally {
     loading.value = false
   }
@@ -163,11 +148,6 @@ const getParentName = (parentId) => {
   if (parentId === 0) return '-'
   const parent = orgList.value.find(item => item.id === parentId)
   return parent ? parent.name : '-'
-}
-
-const handleSearch = () => {
-  currentPage.value = 1
-  fetchOrgList()
 }
 
 const handlePageChange = (page) => {

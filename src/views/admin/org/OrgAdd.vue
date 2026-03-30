@@ -67,16 +67,17 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { orgAPI } from '@/apis/admin-api/organization-api.js'
-import { toastSuccess, toastError, toastException } from '@/utils/toast.js'
+import { orgAPI } from '@/apis/admin-api/organization-api'
+import { toastSuccess, toastError, toastException } from '@/utils/toast'
+import type { OrganizationExDTO } from '@/apis/admin-api/organization-types'
 
 const router = useRouter()
 
 const loading = ref(false)
-const orgList = ref([])
+const orgList = ref<OrganizationExDTO[]>([])
 
 const formData = ref({
   parent_id: 0,
@@ -94,15 +95,13 @@ const fetchOrgList = async () => {
       page: 1,
       pageSize: 1000
     })
-    const data = response?.data || response
-    if (data && typeof data === 'object' && 'list' in data) {
-      orgList.value = data.list || []
-    } else if (Array.isArray(data)) {
-      orgList.value = data
+    if (response.code !== 0) {
+      toastException(response.message, '获取组织列表失败')
+      return
     }
+    orgList.value = response.data.list ?? []
   } catch (error) {
-    toastException(error, '获取组织列表失败:')
-    // console.error('获取组织列表失败:', error)
+    toastException(error, '获取组织列表失败')
     orgList.value = []
   }
 }
@@ -131,19 +130,11 @@ const handleSubmit = async () => {
 
   loading.value = true
   try {
-    // 根据 parent_id 计算 level 和 path 后台处理path字段
-    // if (formData.value.parent_id > 0) {
-    //   const parent = orgList.value.find(org => org.id === formData.value.parent_id)
-    //   if (parent) {
-    //     formData.value.level = (parent.level || 0) + 1
-    //     formData.value.node_path = parent.node_path ? `${parent.node_path}/${parent.id}` : `${parent.id}`
-    //   }
-    // } else {
-    //   formData.value.level = 0
-    //   formData.value.node_path = ''
-    // }
-
-    await orgAPI.add(formData.value)
+    const response = await orgAPI.add(formData.value)
+    if (response.code !== 0) {
+      toastException(response.message, '新增失败')
+      return
+    }
     toastSuccess('新增成功')
     router.push({ name: 'admin.org.list' })
   } catch (error) {

@@ -105,19 +105,22 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { operationAPI } from '@/apis/admin-api/operation-api.js'
-import { menuFetchList } from '@/apis/admin-api/menu-api.js'
-import { subsystemFetchList } from '@/apis/admin-api/subsystem-api.js'
-import { toastSuccess, toastException } from '@/utils/toast.js'
+import { operationAPI } from '@/apis/admin-api/operation-api'
+import { menuAPI } from '@/apis/admin-api/menu-api'
+import { subsystemAPI } from '@/apis/admin-api/subsystem-api'
+import { toastSuccess, toastException } from '@/utils/toast'
+import type { SubsystemExDTO } from '@/apis/admin-api/subsystem-types'
+import type { MenuExDTO } from '@/apis/admin-api/menu-types'
+
 
 const router = useRouter()
 
 const loading = ref(false)
-const subsystemList = ref([])
-const menuList = ref([])
+const subsystemList = ref<SubsystemExDTO[]>([])
+const menuList = ref<MenuExDTO[]> ([])
 
 const formData = ref({
   system_id: 0,
@@ -180,10 +183,14 @@ const handleParentMenuChange = () => {
 // 获取子系统列表
 const fetchSubsystemList = async () => {
   try {
-    const result = await subsystemFetchList()
-    subsystemList.value = result.list || []
+    const response = await subsystemAPI.query({ page: 1, pageSize: 1000 })
+    if (response.code !== 0) {
+      toastException(response.message, '获取子系统列表失败')
+      return
+    }
+    subsystemList.value = response.data.list ?? []
   } catch (error) {
-    console.error('获取子系统列表失败:', error)
+    toastException(error, '获取子系统列表失败')
     subsystemList.value = []
   }
 }
@@ -191,10 +198,14 @@ const fetchSubsystemList = async () => {
 // 获取菜单列表（用于选择一级菜单和菜单）
 const fetchMenuList = async () => {
   try {
-    const result = await menuFetchList()
-    menuList.value = result.list || []
+    const response = await menuAPI.query({ page: 1, pageSize: 1000 })
+    if (response.code !== 0) {
+      toastException(response.message, '获取菜单列表失败')
+      return
+    }
+    menuList.value = response.data.list ?? []
   } catch (error) {
-    console.error('获取菜单列表失败:', error)
+    toastException(error, '获取菜单列表失败')
     menuList.value = []
   }
 }
@@ -218,7 +229,7 @@ const handleSubmit = async () => {
 
   loading.value = true
   try {
-    await operationAPI.add({
+    const response = await operationAPI.add({
       system_id: formData.value.system_id,
       menu_id: formData.value.menu_id || 0,
       name: formData.value.name.trim(),
@@ -226,6 +237,10 @@ const handleSubmit = async () => {
       status: formData.value.status !== undefined ? formData.value.status : 1,
       order_no: formData.value.order_no || 0
     })
+    if (response.code !== 0) {
+      toastException(response.message, '新增失败')
+      return
+    }
     toastSuccess('新增成功')
     router.push({ name: 'admin.operation.list' })
   } catch (error) {

@@ -59,7 +59,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { reactive, ref, onMounted } from 'vue'
 
 // ========== 示例 1: reactive 对象（响应式） ==========

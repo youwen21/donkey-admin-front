@@ -144,12 +144,13 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { userAPI } from '@/apis/admin-api/user-api.js'
-import { roleAPI } from '@/apis/admin-api/role-api.js'
-import { orgAPI } from '@/apis/admin-api/organization-api.js'
+import { userAPI } from '@/apis/admin-api/user-api'
+import { roleAPI } from '@/apis/admin-api/role-api'
+import { orgAPI } from '@/apis/admin-api/organization-api'
+import { routeParam } from '@/utils/route'
 
 const router = useRouter()
 const route = useRoute()
@@ -214,7 +215,7 @@ const fetchOrgList = async () => {
 
 // 获取用户详情
 const fetchUserDetail = async () => {
-  const id = route.params.id
+  const id = routeParam(route.params.id)
   if (!id) {
     alert('缺少用户ID')
     router.push({ name: 'admin.user.list' })
@@ -223,7 +224,7 @@ const fetchUserDetail = async () => {
 
   loading.value = true
   try {
-    const response = await userAPI.get({ id: parseInt(id) })
+    const response = await userAPI.get({ id: parseInt(id, 10) })
     const data = response?.data || response
     if (data) {
       Object.assign(formData.value, {
@@ -272,7 +273,7 @@ const handleSubmit = async () => {
   loading.value = true
   try {
     // 使用 setInfo 方法，允许 0 和空字符串
-    const submitData = {
+    const submitData: Record<string, unknown> = {
       id: formData.value.id,
       name: formData.value.name.trim(),
       real_name: formData.value.real_name || '',
@@ -284,7 +285,7 @@ const handleSubmit = async () => {
       status: formData.value.status !== undefined ? formData.value.status : 1,
       avatar: formData.value.avatar || '',
       role_id: formData.value.role_id || 0,
-      org_id: formData.value.org_id || 0
+      org_id: formData.value.org_id || 0,
     }
 
     // 如果密码不为空，则更新密码

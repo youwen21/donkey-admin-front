@@ -103,12 +103,12 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { subsystemAPI, subsystemQuery } from '@/apis/admin-api/subsystem-api.js'
-import { formatDateTime } from '@/utils/date.js'
-import { toastSuccess, toastError, toastException, confirm } from '@/utils/toast.js'
+import { subsystemAPI } from '@/apis/admin-api/subsystem-api'
+import { formatDateTime } from '@/utils/date'
+import { toastSuccess, toastError, toastException, confirm } from '@/utils/toast'
 import Pagination from '@/components/Pagination.vue'
 
 const router = useRouter()
@@ -133,14 +133,18 @@ const displayList = computed(() => {
 const fetchSubsystemList = async () => {
   loading.value = true
   try {
-    const result = await subsystemQuery({
+    const response = await subsystemAPI.query({
       page: currentPage.value,
       pageSize: pageSize.value,
       name: searchKeyword.value || "",
       status: statusFilter.value === '' ? 0 : parseInt(statusFilter.value)
     })
-    subsystemList.value = result.list
-    total.value = result.total
+    if (response.code !== 0) {
+      toastException(response.message, '获取子系统列表失败')
+      return
+    }
+    subsystemList.value = response.data.list ?? []
+    total.value = response.data.total
   } finally {
     loading.value = false
   }

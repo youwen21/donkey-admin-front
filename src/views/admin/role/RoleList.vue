@@ -97,12 +97,12 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { roleAPI, roleQuery } from '@/apis/admin-api/role-api.js'
-import { formatDateTime } from '@/utils/date.js'
-import { toastSuccess, toastError, toastException, confirm } from '@/utils/toast.js'
+import { roleAPI } from '@/apis/admin-api/role-api'
+import { formatDateTime } from '@/utils/date'
+import { toastSuccess, toastError, toastException, confirm } from '@/utils/toast'
 import Pagination from '@/components/Pagination.vue'
 
 const router = useRouter()
@@ -127,14 +127,18 @@ const displayList = computed(() => {
 const fetchRoleList = async () => {
   loading.value = true
   try {
-    const result = await roleQuery({
+    const response = await roleAPI.query({
       page: currentPage.value,
       pageSize: pageSize.value,
       name: searchKeyword.value || "",
       status: statusFilter.value === '' ? 0 : parseInt(statusFilter.value)
     })
-    roleList.value = result.list
-    total.value = result.total
+    if (response.code !== 0) {
+      toastException(response.message, '获取角色列表失败')
+      return
+    }
+    roleList.value = response.data.list ?? []
+    total.value = response.data.total
   } finally {
     loading.value = false
   }
@@ -170,10 +174,14 @@ const handleSetStatus = async (item) => {
   
   if (await confirm(`确定要${action}角色"${item.name}"吗？`)) {
     try {
-      await roleAPI.setInfo({
+      const response = await roleAPI.setInfo({
         id: item.id,
         status: newStatus
       })
+      if (response.code !== 0) {
+        toastException(response.message, `${action}失败`)
+        return
+      }
       await fetchRoleList()
       toastSuccess(`${action}成功`)
     } catch (error) {

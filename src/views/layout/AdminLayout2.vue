@@ -14,11 +14,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import SideMenu from '@/components/admin/SideMenu.vue'
 import AdminHeader from '@/components/admin/AdminHeader.vue'
-import { menuAPI } from '@/apis/admin-api/menu-api.js'
+import { menuAPI } from '@/apis/admin-api/menu-api'
 
 // 菜单数据
 const menuData = ref([])
@@ -27,10 +27,8 @@ const menuData = ref([])
 const fetchMenuData = async () => {
   try {
     const response = await menuAPI.getTree()
-    // 根据实际 API 响应结构调整
-    // 如果响应是 { data: [...] }，使用 response.data
-    // 如果响应直接是数组，使用 response
-    menuData.value = response?.data || response || []
+    const raw = response?.data ?? response
+    menuData.value = Array.isArray(raw) ? raw : []
   } catch (error) {
     console.error('获取菜单数据失败:', error)
     // 失败时使用空数组，避免菜单组件报错

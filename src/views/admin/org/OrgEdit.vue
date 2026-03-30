@@ -79,18 +79,18 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { orgAPI } from '@/apis/admin-api/organization-api.js'
-import { toastSuccess, toastError, toastWarning, toastException } from '@/utils/toast.js'
-
-
+import { orgAPI } from '@/apis/admin-api/organization-api'
+import { toastSuccess, toastError, toastWarning, toastException } from '@/utils/toast'
+import { routeParam } from '@/utils/route'
+import type { OrganizationExDTO } from '@/apis/admin-api/organization-types'
 const router = useRouter()
 const route = useRoute()
 
 const loading = ref(false)
-const orgList = ref([])
+const orgList = ref<OrganizationExDTO[]>([])
 
 const formData = ref({
   id: 0,
@@ -142,7 +142,7 @@ const fetchOrgList = async () => {
 
 // 获取组织详情
 const fetchOrgDetail = async () => {
-  const id = route.params.id
+  const id = routeParam(route.params.id)
   if (!id) {
     toastError('缺少组织ID')
     router.push({ name: 'admin.org.list' })
@@ -151,8 +151,12 @@ const fetchOrgDetail = async () => {
 
   loading.value = true
   try {
-    const response = await orgAPI.get({ id: parseInt(id) })
-    const data = response?.data || response
+    const response = await orgAPI.get({ id: parseInt(id, 10) })
+    if (response.code !== 0) {
+      toastException(response.message, '获取组织详情失败')
+      return
+    }
+    const data = response.data
     if (data) {
       Object.assign(formData.value, {
         id: data.id || 0,
@@ -198,14 +202,13 @@ const handleSubmit = async () => {
   loading.value = true
   try {
     const  response = await orgAPI.update(formData.value)
-    if (response.code === 0) {
+    if (response.code !== 0) {
+      toastException(response.message, '更新失败')
+      return
+    }
       toastSuccess('更新成功')
       router.push({ name: 'admin.org.list' })
-    } else {
-      toastError(response?.message || '更新失败')
-    }
   } catch (error) {
-    console.error('更新组织失败:', error)
     toastException(error, '更新失败')
   } finally {
     loading.value = false

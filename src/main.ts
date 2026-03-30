@@ -5,7 +5,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 
-import { permissionPlugInstance } from './plugins/permission.js'
+import { permissionPlugInstance } from './plugins/permission'
 
 const app = createApp(App)
 

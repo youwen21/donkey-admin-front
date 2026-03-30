@@ -28,20 +28,29 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import MenuItem from './MenuItem.vue'
 
-const activeItemPath = ref("")
-let  activeItemNodePath = ""
+const activeItemPath = ref('')
+let activeItemNodePath = ''
 
-const props = defineProps({
-  menuData: {
-    type: Array,
-    default: () => []
-  }
-})
+export interface SideMenuNode {
+  id: number
+  url?: string
+  node_path?: string
+  status?: number
+  order_no?: number
+  children?: SideMenuNode[]
+}
+
+const props = withDefaults(
+  defineProps<{
+    menuData?: SideMenuNode[]
+  }>(),
+  { menuData: () => [] },
+)
 
 const route = useRoute()
 
@@ -60,7 +69,7 @@ const menuList = computed(() => {
 })
 
 // 获取过滤并排序后的子菜单
-const getFilteredChildren = (item) => {
+const getFilteredChildren = (item: SideMenuNode) => {
   if (!item.children || item.children.length === 0) {
     return []
   }
@@ -70,7 +79,7 @@ const getFilteredChildren = (item) => {
 }
 
 // 获取菜单路径, item.url格式 是 /xxx/xxx 或者  /xxx/xxx?param=value, 返回 /xxx/xxx
-const getMenuPath = (item) => {
+const getMenuPath = (item: SideMenuNode) => {
   if (!item.url) return ''
 
   // 如果 url 包含 ?，则返回 url 的 path
@@ -83,12 +92,12 @@ const getMenuPath = (item) => {
 }
 
 // 获取菜单节点路径, 返回 /1/2/3/
-const getMenuNodePath = (item) => {
-  return item.node_path + item.id + '/'
+const getMenuNodePath = (item: SideMenuNode) => {
+  return (item.node_path ?? '') + item.id + '/'
 }
 
 // 判断菜单项是否激活
-const isItemActive = (item) => {
+const isItemActive = (item: SideMenuNode) => {
   const menuPath = getMenuPath(item)
   if (!menuPath) return false
 
@@ -131,7 +140,7 @@ const isItemActive = (item) => {
 }
 
 // 检查菜单项是否有激活的子菜单
-const hasItemActiveChild = (item) => {
+const hasItemActiveChild = (item: SideMenuNode) => {
   if (!item.children || item.children.length === 0) return false
   
   const activePath = activeItemPath.value || route.path
@@ -152,7 +161,7 @@ const hasItemActiveChild = (item) => {
 }
 
 // 处理菜单项点击
-const handleItemClick = (item) => {
+const handleItemClick = (item: SideMenuNode) => {
   const itemPath = getMenuPath(item)
   if (itemPath && itemPath != '/') {
     activeItemPath.value = itemPath
@@ -170,7 +179,7 @@ const handleItemClick = (item) => {
 }
 
 // 递归查找匹配路径的菜单项
-const findMenuItemByPath = (items, targetPath) => {
+const findMenuItemByPath = (items: SideMenuNode[], targetPath: string): SideMenuNode | null => {
   for (const item of items) {
     if (item.status !== 1) continue
     
@@ -204,7 +213,11 @@ const findMenuItemByPath = (items, targetPath) => {
 }
 
 // 递归展开包含激活项的父菜单
-const expandParentMenus = (items, targetPath, parentIds = []) => {
+const expandParentMenus = (
+  items: SideMenuNode[],
+  targetPath: string,
+  parentIds: number[] = [],
+) => {
   for (const item of items) {
     if (item.status !== 1) continue
     

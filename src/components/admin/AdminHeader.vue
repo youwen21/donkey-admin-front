@@ -61,12 +61,12 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { authAPI } from '@/apis/admin-api/auth-api.js'
-import myAPI from '@/apis/admin-api/my-api.js'
-import { confirm, toastSuccess, toastException } from '@/utils/toast.js'
+import { authAPI } from '@/apis/admin-api/auth-api'
+import myAPI from '@/apis/admin-api/my-api'
+import { confirm, toastSuccess, toastException } from '@/utils/toast'
 
 const route = useRoute()
 const router = useRouter()
@@ -75,18 +75,20 @@ const router = useRouter()
 const showUserMenu = ref(false)
 const isFullscreen = ref(false)
 const unreadCount = ref(5)
-const currentUser = ref({
+const currentUser = ref<Record<string, unknown>>({
   name: '',
-  real_name: ''
+  real_name: '',
 })
 
 // 计算属性
 const userInitial = computed(() => {
-  if (currentUser.value.real_name) {
-    return currentUser.value.real_name.charAt(0).toUpperCase()
+  const real = currentUser.value.real_name
+  if (typeof real === 'string' && real) {
+    return real.charAt(0).toUpperCase()
   }
-  if (currentUser.value.name) {
-    return currentUser.value.name.charAt(0).toUpperCase()
+  const name = currentUser.value.name
+  if (typeof name === 'string' && name) {
+    return name.charAt(0).toUpperCase()
   }
   return 'A'
 })
@@ -154,8 +156,9 @@ const handleLogout = async () => {
 }
 
 // 点击外部关闭用户菜单
-const handleClickOutside = (event) => {
-  if (showUserMenu.value && !event.target.closest('.user-info')) {
+const handleClickOutside = (event: MouseEvent) => {
+  const t = event.target as HTMLElement | null
+  if (showUserMenu.value && t && !t.closest('.user-info')) {
     showUserMenu.value = false
   }
 }
@@ -184,30 +187,30 @@ const fetchCurrentUser = async () => {
         staff_no: response.data.staff_no,
         status: response.data.status
       }
-    } else {
-      console.warn('获取用户信息失败:', response?.message || '未知错误')
+    // } else {
+      // console.warn('获取用户信息失败:', response?.message || '未知错误')
       // 如果 API 失败，尝试从 localStorage 获取
-      const userStr = localStorage.getItem('currentUser')
-      if (userStr) {
-        try {
-          currentUser.value = JSON.parse(userStr)
-        } catch (e) {
-          console.error('解析用户信息失败:', e)
-        }
-      }
+      // const userStr = localStorage.getItem('currentUser')
+      // if (userStr) {
+      //   try {
+      //     currentUser.value = JSON.parse(userStr)
+      //   } catch (e) {
+      //     console.error('解析用户信息失败:', e)
+      //   }
+      // }
     }
   } catch (error) {
-    console.error('获取用户信息异常:', error)
-    toastException(error, '获取用户信息失败')
+    // console.error('获取用户信息异常:', error)
+    toastException(error, '获取用户信息异常')
     // 如果 API 失败，尝试从 localStorage 获取
-    const userStr = localStorage.getItem('currentUser')
-    if (userStr) {
-      try {
-        currentUser.value = JSON.parse(userStr)
-      } catch (e) {
-        console.error('解析用户信息失败:', e)
-      }
-    }
+    // const userStr = localStorage.getItem('currentUser')
+    // if (userStr) {
+    //   try {
+    //     currentUser.value = JSON.parse(userStr)
+    //   } catch (e) {
+    //     console.error('解析用户信息失败:', e)
+    //   }
+    // }
   }
 }
 
